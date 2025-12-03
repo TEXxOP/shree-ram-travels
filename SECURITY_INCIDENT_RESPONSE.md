@@ -87,7 +87,7 @@ Update `server/.env` with new MongoDB password.
 ## 📊 Impact Assessment:
 
 ### What Was Exposed:
-- ✅ MongoDB credentials (username: luvthapa8, password: 1234abcd)
+- ✅ MongoDB credentials (username and password)
 - ✅ Cloudinary API keys
 - ✅ Gmail app password
 - ✅ Admin token
