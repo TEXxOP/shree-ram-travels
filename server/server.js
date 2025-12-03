@@ -4,7 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer'); 
+const sgMail = require('@sendgrid/mail'); // SendGrid for emails
 const multer = require('multer'); 
 const path = require('path');
 const fs = require('fs');
@@ -24,14 +24,22 @@ const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_SUPER_SECRET_KEY';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'shreeram_admin_token_123'; 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@example.com';
 const EMAIL_USER = process.env.EMAIL_USER;
-const EMAIL_PASS = process.env.EMAIL_PASS;
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const RENDER_API_URL = 'https://shree-ram-travels-api.onrender.com';
+
+// Configure SendGrid
+if (SENDGRID_API_KEY) {
+    sgMail.setApiKey(SENDGRID_API_KEY);
+    console.log('✅ SendGrid configured successfully');
+} else {
+    console.warn('⚠️ SENDGRID_API_KEY not set - emails will not be sent');
+}
 
 // Log email configuration on startup
 console.log('📧 Email Configuration:');
-console.log('EMAIL_USER:', EMAIL_USER);
-console.log('EMAIL_PASS:', EMAIL_PASS ? '***' + EMAIL_PASS.slice(-4) : 'NOT SET');
-console.log('ADMIN_EMAIL:', ADMIN_EMAIL); 
+console.log('EMAIL_USER (From):', EMAIL_USER);
+console.log('ADMIN_EMAIL (To):', ADMIN_EMAIL);
+console.log('SendGrid API Key:', SENDGRID_API_KEY ? '***' + SENDGRID_API_KEY.slice(-4) : 'NOT SET'); 
 
 // --- Cloudinary Configuration ---
 cloudinary.config({
@@ -86,73 +94,75 @@ mongoose.connect(MONGO_URI)
 // --- File Upload (Multer) Setup: Use memory storage ---
 const upload = multer({ storage: multer.memoryStorage() }); 
 
-// --- Nodemailer Setup (Render Free Tier Workaround) ---
-// Note: Render free tier blocks SMTP ports. Email will be logged but not sent.
-// For production, upgrade Render or use SendGrid/Mailgun API instead.
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASS,
-    },
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
-    tls: {
-        rejectUnauthorized: false
-    }
-});
-
-// Verify transporter configuration on startup
-transporter.verify(function (error, success) {
-    if (error) {
-        console.error('❌ Nodemailer configuration error:', error);
-        console.error('Please check EMAIL_USER and EMAIL_PASS in .env file');
-    } else {
-        console.log('✅ Email server is ready to send messages');
-    }
-});
-
-// Helper function to send email notification (USES CLOUDINARY URL)
+// --- SendGrid Email Helper Function ---
 const sendAdminNotification = async (bookingData, imageUrl) => {
-    const mailOptions = {
+    const msg = {
         to: ADMIN_EMAIL,
-        from: EMAIL_USER, 
-        subject: `ACTION REQUIRED: Payment Verification for Booking ${bookingData.TS}`, 
+        from: EMAIL_USER, // Must be verified in SendGrid
+        subject: `ACTION REQUIRED: Payment Verification for Booking ${bookingData.TS}`,
         html: `
-            <p>A new payment proof screenshot has been uploaded. **TS NUMBER: <strong>${bookingData.TS}</strong>**</p>
-            <p><strong>Booking ID:</strong> ${bookingData._id}</p>
-            <p><strong>Status:</strong> Processing</p>
-            <p><strong>Customer:</strong> ${bookingData.userName} (${bookingData.userPhone}, ${bookingData.userEmail})</p>
-            <p><strong>Trip:</strong> ${bookingData.departureCity} to ${bookingData.destinationCity} on ${new Date(bookingData.departureDate).toLocaleDateString()}</p>
-            <p><strong>Amount:</strong> ₹${bookingData.totalAmount.toFixed(2)}</p>
-            
-            <p style="margin-top: 15px;"><strong>VIEW PROOF:</strong> <a href="${imageUrl}" target="_blank">Click here to view screenshot (Cloudinary)</a></p>
-            <p>Please log into the Admin Dashboard to verify the payment and update the status to 'Paid'.</p>
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #004d99;">New Payment Proof Submitted</h2>
+                <p>A new payment proof screenshot has been uploaded.</p>
+                
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="color: #28a745; margin-top: 0;">Tracking Code (TS): ${bookingData.TS}</h3>
+                    <p><strong>Booking ID:</strong> ${bookingData._id}</p>
+                    <p><strong>Status:</strong> <span style="color: orange;">Processing</span></p>
+                </div>
+                
+                <h3>Customer Details:</h3>
+                <ul>
+                    <li><strong>Name:</strong> ${bookingData.userName}</li>
+                    <li><strong>Phone:</strong> ${bookingData.userPhone}</li>
+                    <li><strong>Email:</strong> ${bookingData.userEmail}</li>
+                </ul>
+                
+                <h3>Trip Details:</h3>
+                <ul>
+                    <li><strong>Route:</strong> ${bookingData.departureCity} → ${bookingData.destinationCity}</li>
+                    <li><strong>Date:</strong> ${new Date(bookingData.departureDate).toLocaleDateString()}</li>
+                    <li><strong>Time:</strong> ${bookingData.departureTime}</li>
+                    <li><strong>Seats:</strong> ${bookingData.selectedSeats.join(', ')}</li>
+                    <li><strong>Amount:</strong> ₹${bookingData.totalAmount.toFixed(2)}</li>
+                </ul>
+                
+                <div style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;">
+                    <p style="margin: 0;"><strong>📸 Payment Proof:</strong></p>
+                    <p style="margin: 10px 0 0 0;">
+                        <a href="${imageUrl}" target="_blank" style="color: #004d99; text-decoration: none; font-weight: bold;">
+                            Click here to view screenshot →
+                        </a>
+                    </p>
+                </div>
+                
+                <p style="margin-top: 30px;">Please log into the Admin Dashboard to verify the payment and update the status to 'Paid'.</p>
+                
+                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                    <p style="color: #6c757d; font-size: 0.9rem;">Shree Ram Travels - Bus Booking System</p>
+                </div>
+            </div>
         `,
     };
 
     try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log('✅ Admin notification email sent successfully.');
-        console.log('Message ID:', info.messageId);
-        console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
+        await sgMail.send(msg);
+        console.log('✅ Admin notification email sent successfully via SendGrid!');
+        console.log('📧 Email sent to:', ADMIN_EMAIL);
+        console.log('📋 Booking TS:', bookingData.TS);
     } catch (error) {
-        // Render free tier blocks SMTP - log email details instead
-        console.error('❌ Error sending admin notification:', error.message);
-        console.error('Error code:', error.code);
+        console.error('❌ Error sending email via SendGrid:', error.message);
+        if (error.response) {
+            console.error('SendGrid error details:', error.response.body);
+        }
         
         // Log email details for manual checking
-        console.log('📧 EMAIL DETAILS (SMTP blocked on Render free tier):');
-        console.log('To:', mailOptions.to);
-        console.log('Subject:', mailOptions.subject);
+        console.log('📧 EMAIL DETAILS (for manual verification):');
+        console.log('To:', ADMIN_EMAIL);
         console.log('Booking TS:', bookingData.TS);
         console.log('Customer:', bookingData.userName, bookingData.userEmail);
         console.log('Amount:', bookingData.totalAmount);
         console.log('Payment Proof:', imageUrl);
-        console.log('⚠️ To enable emails: Upgrade Render or use SendGrid/Mailgun API');
     }
 };
 
