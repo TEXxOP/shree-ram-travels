@@ -86,15 +86,20 @@ mongoose.connect(MONGO_URI)
 // --- File Upload (Multer) Setup: Use memory storage ---
 const upload = multer({ storage: multer.memoryStorage() }); 
 
-// --- Nodemailer Setup (SSL for Render compatibility) ---
+// --- Nodemailer Setup (Render Free Tier Workaround) ---
+// Note: Render free tier blocks SMTP ports. Email will be logged but not sent.
+// For production, upgrade Render or use SendGrid/Mailgun API instead.
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465, // SSL port (Render-compatible)
-    secure: true, // Use SSL
+    port: 465,
+    secure: true,
     auth: {
         user: EMAIL_USER,
         pass: EMAIL_PASS,
     },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
     tls: {
         rejectUnauthorized: false
     }
@@ -135,10 +140,19 @@ const sendAdminNotification = async (bookingData, imageUrl) => {
         console.log('Message ID:', info.messageId);
         console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
     } catch (error) {
-        // Log the error but allow the submission process to continue
+        // Render free tier blocks SMTP - log email details instead
         console.error('❌ Error sending admin notification:', error.message);
         console.error('Error code:', error.code);
-        console.error('Full error:', error);
+        
+        // Log email details for manual checking
+        console.log('📧 EMAIL DETAILS (SMTP blocked on Render free tier):');
+        console.log('To:', mailOptions.to);
+        console.log('Subject:', mailOptions.subject);
+        console.log('Booking TS:', bookingData.TS);
+        console.log('Customer:', bookingData.userName, bookingData.userEmail);
+        console.log('Amount:', bookingData.totalAmount);
+        console.log('Payment Proof:', imageUrl);
+        console.log('⚠️ To enable emails: Upgrade Render or use SendGrid/Mailgun API');
     }
 };
 
