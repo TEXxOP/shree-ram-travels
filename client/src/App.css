@@ -1,0 +1,482 @@
+/* client/src/App.css - Enhanced Design & Responsive Fixes */
+:root {
+    --primary-blue: #004d99; /* Deep reliable blue */
+    --accent-green: #28a745; /* Travel/Success green */
+    --background-light: #f8f9fa;
+    --card-background: #ffffff;
+    --text-dark: #343a40;
+    --border-color: #e0e0e0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-light);
+    margin: 0;
+    padding: 0;
+    color: var(--text-dark);
+}
+
+/* Header & Logo */
+.App-header {
+    background-color: white; /* Changed to white */
+    color: var(--primary-blue);
+    padding: 10px 0; /* Reduced vertical padding */
+    margin-bottom: 30px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    text-align: center;
+}
+
+.App-header h3 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.page-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 10px 15px; /* Reduced side padding for mobile */
+}
+
+/* --- Form & Input Styles --- */
+.form-card, .summary-box, .payment-details-form {
+    background-color: var(--card-background);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--primary-blue);
+}
+
+input[type="text"], input[type="date"], input[type="number"], input[type="password"], select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+input:focus, select:focus {
+    border-color: var(--primary-blue);
+    outline: none;
+}
+
+/* --- Buttons --- */
+button.primary-button, button[type="submit"] {
+    background-color: var(--accent-green);
+    color: white;
+    padding: 14px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+button.primary-button:hover:not(:disabled) {
+    background-color: #1e7e34;
+}
+
+button:disabled {
+    background-color: #adb5bd;
+    cursor: not-allowed;
+}
+
+.logout-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+    background-color: #5a6268;
+}
+
+/* --- Seat Map Styles --- */
+.seat-map-container {
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: #f0f4f7;
+}
+
+.seat-map-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    max-width: 350px;
+    margin: 20px auto;
+}
+
+.seat-button {
+    background-color: #cfe2ff; /* Light blue/gray for available */
+    color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    padding: 12px 0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.seat-button:hover:not(.occupied):not(.selected) {
+    background-color: #b3d7ff;
+}
+
+.seat-button.selected {
+    background-color: var(--accent-green);
+    color: white;
+    border-color: var(--accent-green);
+}
+
+.seat-button.occupied {
+    background-color: #dc3545; /* Red for occupied */
+    color: white;
+    border-color: #dc3545;
+    cursor: not-allowed;
+}
+
+/* --- Status/Message Styles --- */
+.success-message {
+    color: var(--accent-green);
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid var(--accent-green);
+    background-color: #e6ffed;
+    border-radius: 4px;
+}
+
+.error-message {
+    color: #dc3545;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #dc3545;
+    background-color: #ffe8e9;
+    border-radius: 4px;
+}
+
+/* --- Admin Table Styles (Responsive Fixes Included) --- */
+.bookings-table-wrapper {
+    /* Enables horizontal scroll on mobile */
+    overflow-x: auto;
+    margin-top: 25px;
+}
+
+.bookings-table {
+    min-width: 900px; /* Forces scroll on small screens */
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.bookings-table th, .bookings-table td {
+    padding: 12px;
+    text-align: left;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.bookings-table th {
+    background-color: var(--primary-blue);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.bookings-table tr:nth-child(even) {
+    background-color: #f0f0f5; 
+}
+
+.status-paid {
+    color: var(--accent-green);
+    font-weight: 600;
+}
+
+.status-pending {
+    color: orange;
+    font-weight: 600;
+}
+
+/* Action Column Fix */
+.bookings-table td:last-child {
+    white-space: nowrap; 
+    min-width: 120px; 
+    padding: 10px 5px; 
+}
+
+/* Route Management Button Fixes */
+.route-item-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 15px;
+}
+
+.route-item-container:hover {
+    background-color: #f8f9fa;
+}
+
+.route-info {
+    flex: 1;
+    min-width: 200px;
+    font-size: 0.95rem;
+}
+
+.route-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.route-actions button {
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.route-actions button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.bookings-table .action-buttons-container {
+    display: flex;
+    flex-direction: column; 
+    gap: 5px; 
+    align-items: stretch; 
+    max-width: 100%; 
+}
+
+.bookings-table .action-buttons-container button {
+    width: 100% !important; 
+    padding: 5px 8px !important;
+    font-size: 0.75rem !important;
+    margin: 0 !important;
+}
+
+/* --- Footer Styles (Restored and Responsive) --- */
+
+.app-footer {
+    background-color: var(--text-dark); /* Dark background */
+    color: #ffffff;
+    padding: 30px 0 15px 0; 
+    margin-top: 50px; 
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 250px;
+}
+
+.footer-section h4 {
+    color: var(--accent-green);
+    border-bottom: 2px solid var(--accent-green);
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+.footer-section p {
+    margin: 5px 0;
+    font-size: 0.95rem;
+}
+
+.footer-section a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-section a:hover {
+    color: var(--accent-green);
+}
+
+.admin-link-button {
+    display: inline-block;
+    background-color: var(--primary-blue);
+    padding: 8px 15px;
+    border-radius: 4px;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.admin-link-button:hover {
+    background-color: #0060c0;
+    color: white;
+}
+
+/* --- Google Map Embed Styles --- */
+
+.mapouter{
+    position:relative;
+    text-align:right;
+    width:100%;
+    height:325px; 
+    border-radius: 8px;
+    overflow: hidden; 
+}
+
+.gmap_canvas {
+    overflow:hidden;
+    background:none!important;
+    width:100%;
+    height:325px;
+}
+
+.gmap_iframe {
+    height:325px!important;
+}
+
+
+/* ========================================================= */
+/* --- RESPONSIVENESS MEDIA QUERIES --- */
+/* ========================================================= */
+
+@media (max-width: 768px) {
+    
+    /* Homepage Search/Tracker Stack (Applies to the HomePage component div) */
+    .page-container.home-grid { 
+        display: block !important;
+        grid-template-columns: 1fr !important;
+        gap: 0 !important;
+    }
+    
+    /* Footer sections stack */
+    .footer-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .footer-section {
+        min-width: 100%;
+    }
+    
+    /* Payment Page Grid Stack */
+    .form-card[style*="grid-template-columns: 1fr 1fr"] {
+        display: block !important;
+    }
+    
+    /* Adjust padding for mobile */
+    .form-card, .summary-box {
+        padding: 20px;
+    }
+}
+/* client/src/App.css - MOBILE CARD VIEW FIX */
+
+@media (max-width: 600px) {
+    /* Hide the horizontal scrollbar wrapper for better appearance */
+    .bookings-table-wrapper {
+        overflow-x: hidden !important; 
+        margin-left: -15px; /* Offset the padding */
+        margin-right: -15px;
+    }
+    
+    .form-card > .bookings-table-wrapper {
+        /* Remove card padding to allow table/cards full mobile width */
+        padding: 0 !important;
+    }
+    
+    .bookings-table {
+        min-width: 100% !important; /* Allow table to shrink */
+        width: 100% !important;
+        border-collapse: collapse; /* Ensure cells collapse */
+    }
+
+    /* Hide table header (Full ID, Status, etc.) */
+    .bookings-table thead {
+        display: none;
+    }
+
+    /* Transform rows into block elements (cards) */
+    .bookings-table tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        background-color: var(--card-background);
+    }
+    
+    /* Transform cells into block elements */
+    .bookings-table td {
+        display: block;
+        text-align: right !important; /* Align data to the right */
+        border: none; /* Remove horizontal lines */
+        padding: 5px 0;
+        font-size: 1rem;
+    }
+
+    /* Add "Header" label using CSS ::before content */
+    .bookings-table td::before {
+        content: attr(data-label); /* Use data-label attribute for the column name */
+        float: left;
+        font-weight: bold;
+        color: var(--primary-blue);
+        text-transform: uppercase;
+        font-size: 0.8rem;
+    }
+    
+    /* Ensure the Action column buttons get full width on the card */
+    .bookings-table td:last-child {
+        text-align: center !important;
+        margin-top: 10px;
+        padding-top: 15px;
+        border-top: 1px dashed var(--border-color);
+    }
+
+    /* Action buttons should stretch horizontally in the card footer */
+    .bookings-table .action-buttons-container {
+        flex-direction: row; /* FIX: Stack vertically OR use row if 2 buttons */
+        flex-wrap: wrap; /* Allows buttons to wrap if space is too small */
+        justify-content: center;
+        width: 100%;
+        max-width: none;
+        gap: 10px;
+    }
+    
+    .bookings-table .action-buttons-container button {
+        /* Force buttons to be larger and responsive for tapping */
+        width: 45% !important; 
+        padding: 10px 5px !important;
+        font-size: 0.8rem !important;
+    }
+    
+    /* Special handling for the single Delete button */
+    .bookings-table tr.paid-row .action-buttons-container button:only-child {
+        width: 100% !important;
+    }
+}
+@keyframes progress-bar {
+    0% { transform: scaleX(0); transform-origin: left center; }
+    50% { transform: scaleX(1); transform-origin: left center; }
+    51% { transform: scaleX(1); transform-origin: right center; }
+    100% { transform: scaleX(0); transform-origin: right center; }
+}
