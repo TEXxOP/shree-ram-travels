@@ -39,6 +39,7 @@ const AdminDashboard = () => {
             fetchRoutes(MOCK_ADMIN_TOKEN);
             fetchBookings(MOCK_ADMIN_TOKEN); 
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoggedIn]);
 
     const fetchBookings = async (token) => {

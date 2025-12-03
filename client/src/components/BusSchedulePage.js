@@ -34,10 +34,11 @@ const BusSchedulePage = () => {
             return;
         }
 
+        const API_URL = RENDER_API_URL; // Capture in local variable
         const fetchSchedule = async () => {
             try {
                 // Fetch the available times (routes) based on the selected departure/destination
-                const routeResponse = await axios.get(`${RENDER_API_URL}/api/routes/all`);
+                const routeResponse = await axios.get(`${API_URL}/api/routes/all`);
                 
                 const foundRoute = routeResponse.data.routes.find(r => 
                     r.departure === departureCity && r.destination === destinationCity
@@ -66,6 +67,7 @@ const BusSchedulePage = () => {
         };
 
         fetchSchedule();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [bookingId, departureCity, destinationCity, departureDate]);
 
     // Action when user selects a bus (time)
