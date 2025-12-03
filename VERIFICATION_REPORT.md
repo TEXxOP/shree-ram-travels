@@ -72,7 +72,7 @@ The Shree Ram Travels bus booking system is **100% complete and functional**. Al
 #### Connection:
 - ✅ MongoDB URI configured
 - ✅ Mongoose 8.19.3 installed
-- ✅ Connection string: `mongodb+srv://luvthapa8:****@shreeramtravels.vis34tq.mongodb.net/`
+- ✅ Connection string: `mongodb+srv://username:****@cluster.mongodb.net/`
 
 ---
 

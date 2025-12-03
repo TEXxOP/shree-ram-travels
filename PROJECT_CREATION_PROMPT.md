@@ -234,15 +234,16 @@ Create a full-stack MERN (MongoDB, Express, React, Node.js) bus ticket booking s
 ## ENVIRONMENT VARIABLES (.env)
 
 ```env
-MONGO_URI="mongodb+srv://luvthapa8:1234abcd@shreeramtravels.vis34tq.mongodb.net/?appName=ShreeRamTravels"
-JWT_SECRET="A_for_apple_B_for_ball"
-ADMIN_TOKEN="shreeram_admin_token_123"
-ADMIN_EMAIL="luvthapa8@gmail.com"
-EMAIL_USER="luvthapa8@gmail.com"
-EMAIL_PASS="oasyfchpyjautruy"
-CLOUDINARY_CLOUD_NAME="dde50yvxc"
-CLOUDINARY_API_KEY="244233567697924"
-CLOUDINARY_API_SECRET="gEQDKQjnUxSi3mc7y2_W_ZgW2DY"
+MONGO_URI="your_mongodb_connection_string_here"
+JWT_SECRET="your_jwt_secret_here"
+ADMIN_TOKEN="your_admin_token_here"
+ADMIN_EMAIL="your_email@gmail.com"
+EMAIL_USER="your_email@gmail.com"
+EMAIL_PASS="your_gmail_app_password_here"
+CLOUDINARY_CLOUD_NAME="your_cloudinary_cloud_name"
+CLOUDINARY_API_KEY="your_cloudinary_api_key"
+CLOUDINARY_API_SECRET="your_cloudinary_api_secret"
+SENDGRID_API_KEY="your_sendgrid_api_key"
 PORT=5000
 ```
 
