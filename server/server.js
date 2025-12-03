@@ -86,18 +86,15 @@ mongoose.connect(MONGO_URI)
 // --- File Upload (Multer) Setup: Use memory storage ---
 const upload = multer({ storage: multer.memoryStorage() }); 
 
-// --- Nodemailer Setup (Reverted to Gmail Service) ---
+// --- Nodemailer Setup (SSL for Render compatibility) ---
 const transporter = nodemailer.createTransport({
-    // Using the 'gmail' service option
-    service: 'gmail', 
+    host: 'smtp.gmail.com',
+    port: 465, // SSL port (Render-compatible)
+    secure: true, // Use SSL
     auth: {
-        user: EMAIL_USER, // luvthapa8@gmail.com
-        pass: EMAIL_PASS, // App-specific password
+        user: EMAIL_USER,
+        pass: EMAIL_PASS,
     },
-    // Adding explicit settings to help with Render's environment, though 'service: gmail' often handles this.
-    host: 'smtp.gmail.com', 
-    port: 587,
-    secure: false, // use STARTTLS
     tls: {
         rejectUnauthorized: false
     }
