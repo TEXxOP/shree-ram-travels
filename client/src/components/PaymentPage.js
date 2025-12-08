@@ -34,7 +34,7 @@ const PaymentPage = () => {
         bankName: "Shree Ram Travels Pvt Ltd",
         accountNumber: "42479127271",
         ifscCode: "SBIN0001576",
-        upiId: "luvthapa2006@sbi"
+        upiId: "shrir987090991@barodampay"
     };
     const qrData = `upi://pay?pa=${bankDetails.upiId}&pn=${bankDetails.bankName}&am=${amount.toFixed(2)}`;
 
