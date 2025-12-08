@@ -96,8 +96,13 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // --- SendGrid Email Helper Function ---
 const sendAdminNotification = async (bookingData, imageUrl) => {
+    // Convert comma-separated emails to array for SendGrid
+    const recipients = ADMIN_EMAIL.includes(',') 
+        ? ADMIN_EMAIL.split(',').map(email => email.trim())
+        : ADMIN_EMAIL;
+    
     const msg = {
-        to: ADMIN_EMAIL,
+        to: recipients,
         from: EMAIL_USER, // Must be verified in SendGrid
         subject: `ACTION REQUIRED: Payment Verification for Booking ${bookingData.TS}`,
         html: `
