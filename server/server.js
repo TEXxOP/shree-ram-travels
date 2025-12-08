@@ -94,7 +94,9 @@ mongoose.connect(MONGO_URI)
 // --- File Upload (Multer) Setup: Use memory storage ---
 const upload = multer({ storage: multer.memoryStorage() }); 
 
-// --- SendGrid Email Helper Function ---
+// --- SendGrid Email Helper Functions ---
+
+// Send notification to admin when payment proof is submitted
 const sendAdminNotification = async (bookingData, imageUrl) => {
     // Convert comma-separated emails to array for SendGrid
     const recipients = ADMIN_EMAIL.includes(',') 
@@ -168,6 +170,107 @@ const sendAdminNotification = async (bookingData, imageUrl) => {
         console.log('Customer:', bookingData.userName, bookingData.userEmail);
         console.log('Amount:', bookingData.totalAmount);
         console.log('Payment Proof:', imageUrl);
+    }
+};
+
+// Send confirmation email to customer when payment is approved/rejected
+const sendCustomerNotification = async (bookingData, status) => {
+    if (!bookingData.userEmail) {
+        console.log('⚠️ No customer email found, skipping notification');
+        return;
+    }
+
+    const isApproved = status === 'Paid';
+    const statusColor = isApproved ? '#28a745' : '#dc3545';
+    const statusText = isApproved ? 'APPROVED ✅' : 'REJECTED ❌';
+    
+    const msg = {
+        to: bookingData.userEmail,
+        from: EMAIL_USER,
+        subject: `Booking ${isApproved ? 'Confirmed' : 'Cancelled'} - ${bookingData.TS}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background-color: ${statusColor}; color: white; padding: 20px; text-align: center;">
+                    <h1 style="margin: 0;">Shree Ram Travels</h1>
+                    <h2 style="margin: 10px 0 0 0;">Payment ${statusText}</h2>
+                </div>
+                
+                <div style="padding: 30px; background-color: #f8f9fa;">
+                    <p style="font-size: 1.1rem;">Dear ${bookingData.userName},</p>
+                    
+                    ${isApproved ? `
+                        <p>Great news! Your payment has been verified and your booking is confirmed! 🎉</p>
+                    ` : `
+                        <p>We're sorry, but your payment could not be verified. Your booking has been cancelled.</p>
+                        <p>Please contact us if you believe this is an error.</p>
+                    `}
+                </div>
+                
+                <div style="padding: 20px; background-color: white;">
+                    <h3 style="color: #004d99; border-bottom: 2px solid #004d99; padding-bottom: 10px;">Booking Details</h3>
+                    
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 8px; font-weight: bold;">Tracking Code (TS):</td>
+                            <td style="padding: 8px; color: ${statusColor}; font-weight: bold; font-size: 1.2rem;">${bookingData.TS}</td>
+                        </tr>
+                        <tr style="background-color: #f8f9fa;">
+                            <td style="padding: 8px; font-weight: bold;">Status:</td>
+                            <td style="padding: 8px; color: ${statusColor}; font-weight: bold;">${status}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; font-weight: bold;">Route:</td>
+                            <td style="padding: 8px;">${bookingData.departureCity} → ${bookingData.destinationCity}</td>
+                        </tr>
+                        <tr style="background-color: #f8f9fa;">
+                            <td style="padding: 8px; font-weight: bold;">Date:</td>
+                            <td style="padding: 8px;">${new Date(bookingData.departureDate).toLocaleDateString()}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; font-weight: bold;">Time:</td>
+                            <td style="padding: 8px;">${bookingData.departureTime}</td>
+                        </tr>
+                        <tr style="background-color: #f8f9fa;">
+                            <td style="padding: 8px; font-weight: bold;">Seats:</td>
+                            <td style="padding: 8px;">${bookingData.selectedSeats.join(', ')}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; font-weight: bold;">Amount:</td>
+                            <td style="padding: 8px; font-weight: bold; font-size: 1.1rem;">₹${bookingData.totalAmount.toFixed(2)}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                ${isApproved ? `
+                    <div style="padding: 20px; background-color: #d4edda; border-left: 4px solid #28a745; margin: 20px 0;">
+                        <p style="margin: 0; font-weight: bold;">✅ Your ticket is confirmed!</p>
+                        <p style="margin: 10px 0 0 0;">Please arrive at the boarding point 15 minutes before departure.</p>
+                    </div>
+                ` : `
+                    <div style="padding: 20px; background-color: #f8d7da; border-left: 4px solid #dc3545; margin: 20px 0;">
+                        <p style="margin: 0; font-weight: bold;">Need Help?</p>
+                        <p style="margin: 10px 0 0 0;">Contact us: +91 98709 95956</p>
+                    </div>
+                `}
+                
+                <div style="text-align: center; padding: 20px; background-color: #343a40; color: white;">
+                    <p style="margin: 0;">Shree Ram Travels</p>
+                    <p style="margin: 5px 0; font-size: 0.9rem;">Nathuwa wala, Dehradun, Uttarakhand-248008</p>
+                    <p style="margin: 5px 0; font-size: 0.9rem;">Phone: +91 98709 95956</p>
+                </div>
+            </div>
+        `,
+    };
+
+    try {
+        await sgMail.send(msg);
+        console.log(`✅ Customer notification sent to: ${bookingData.userEmail}`);
+        console.log(`📋 Status: ${status}, TS: ${bookingData.TS}`);
+    } catch (error) {
+        console.error('❌ Error sending customer notification:', error.message);
+        if (error.response) {
+            console.error('SendGrid error:', error.response.body);
+        }
     }
 };
 
@@ -385,6 +488,10 @@ app.put('/api/admin/bookings/:id/verify', verifyAdminToken, async (req, res) => 
         if (!booking) {
             return res.status(404).json({ message: 'Booking not found.' });
         }
+        
+        // Send notification email to customer
+        console.log('📧 Sending customer notification...');
+        await sendCustomerNotification(booking, status);
         
         res.json({ message: `Booking ${bookingId} status updated to ${status}.`, booking });
 
