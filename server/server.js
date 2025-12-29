@@ -114,7 +114,7 @@ const sendAdminNotification = async (bookingData, imageUrl) => {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
                 <!-- Header -->
                 <div style="background: linear-gradient(135deg, #004d99, #0066cc); color: white; padding: 20px; text-align: center;">
-                    <img src="https://shree-ram-travels.vercel.app/shree-ram-logo.png" alt="Shree Ram Tour and Travels" style="height: 60px; width: auto; margin-bottom: 10px;" />
+                    <img src="https://shree-ram-travels.vercel.app/shree-ram-logo.png" alt="Shree Ram Tour and Travels" style="height: 60px; width: auto; margin-bottom: 10px; background: white; padding: 5px; border-radius: 5px;" />
                     <h2 style="margin: 10px 0 0 0; color: white;">New Payment Proof Submitted</h2>
                 </div>
                 
@@ -201,7 +201,7 @@ const sendCustomerNotification = async (bookingData, status) => {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
                 <!-- Header -->
                 <div style="background: linear-gradient(135deg, #004d99, #0066cc); color: white; padding: 20px; text-align: center;">
-                    <img src="https://shree-ram-travels.vercel.app/shree-ram-logo.png" alt="Shree Ram Tour and Travels" style="height: 60px; width: auto; margin-bottom: 10px;" />
+                    <img src="https://shree-ram-travels.vercel.app/shree-ram-logo.png" alt="Shree Ram Tour and Travels" style="height: 60px; width: auto; margin-bottom: 10px; background: white; padding: 5px; border-radius: 5px;" />
                     <h2 style="margin: 10px 0 0 0; font-size: 1.2rem;">${isApproved ? 'E-TICKET CONFIRMED' : 'BOOKING CANCELLED'}</h2>
                 </div>
                 
@@ -333,7 +333,7 @@ const sendNewBookingNotification = async (bookingData) => {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
                 <!-- Header -->
                 <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 20px; text-align: center;">
-                    <img src="https://shree-ram-travels.vercel.app/shree-ram-logo.png" alt="Shree Ram Tour and Travels" style="height: 60px; width: auto; margin-bottom: 10px;" />
+                    <img src="https://shree-ram-travels.vercel.app/shree-ram-logo.png" alt="Shree Ram Tour and Travels" style="height: 60px; width: auto; margin-bottom: 10px; background: white; padding: 5px; border-radius: 5px;" />
                     <h2 style="margin: 10px 0 0 0; font-size: 1.3rem;">🔔 NEW BOOKING RECEIVED</h2>
                 </div>
                 
