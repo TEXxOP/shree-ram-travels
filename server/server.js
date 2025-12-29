@@ -111,22 +111,28 @@ const sendAdminNotification = async (bookingData, imageUrl) => {
         from: EMAIL_USER, // Must be verified in SendGrid
         subject: `ACTION REQUIRED: Payment Verification for Booking ${bookingData.TS}`,
         html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #004d99;">New Payment Proof Submitted</h2>
-                <p>A new payment proof screenshot has been uploaded.</p>
-                
-                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    <h3 style="color: #28a745; margin-top: 0;">Tracking Code (TS): ${bookingData.TS}</h3>
-                    <p><strong>Booking ID:</strong> ${bookingData._id}</p>
-                    <p><strong>Status:</strong> <span style="color: orange;">Processing</span></p>
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #004d99, #0066cc); color: white; padding: 20px; text-align: center;">
+                    <img src="https://shree-ram-travels.vercel.app/shree-ram-logo.png" alt="Shree Ram Tour and Travels" style="height: 60px; width: auto; margin-bottom: 10px;" />
+                    <h2 style="margin: 10px 0 0 0; color: white;">New Payment Proof Submitted</h2>
                 </div>
                 
-                <h3>Customer Details:</h3>
-                <ul>
-                    <li><strong>Name:</strong> ${bookingData.userName}</li>
-                    <li><strong>Phone:</strong> ${bookingData.userPhone}</li>
-                    <li><strong>Email:</strong> ${bookingData.userEmail}</li>
-                </ul>
+                <div style="padding: 20px;">
+                    <p>A new payment proof screenshot has been uploaded.</p>
+                    
+                    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h3 style="color: #28a745; margin-top: 0;">Tracking Code (TS): ${bookingData.TS}</h3>
+                        <p><strong>Booking ID:</strong> ${bookingData._id}</p>
+                        <p><strong>Status:</strong> <span style="color: orange;">Processing</span></p>
+                    </div>
+                    
+                    <h3>Customer Details:</h3>
+                    <ul>
+                        <li><strong>Name:</strong> ${bookingData.userName}</li>
+                        <li><strong>Phone:</strong> ${bookingData.userPhone}</li>
+                        <li><strong>Email:</strong> ${bookingData.userEmail}</li>
+                    </ul>
                 
                 <h3>Trip Details:</h3>
                 <ul>
@@ -149,7 +155,7 @@ const sendAdminNotification = async (bookingData, imageUrl) => {
                 <p style="margin-top: 30px;">Please log into the Admin Dashboard to verify the payment and update the status to 'Paid'.</p>
                 
                 <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
-                    <p style="color: #6c757d; font-size: 0.9rem;">Shree Ram Travels - Bus Booking System</p>
+                    <p style="color: #6c757d; font-size: 0.9rem;">Shree Ram Tour and Travels - Premium Bus Services</p>
                 </div>
             </div>
         `,
@@ -195,7 +201,7 @@ const sendCustomerNotification = async (bookingData, status) => {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
                 <!-- Header -->
                 <div style="background: linear-gradient(135deg, #004d99, #0066cc); color: white; padding: 20px; text-align: center;">
-                    <h1 style="margin: 0; font-size: 1.8rem;">🚌 Shree Ram Travels</h1>
+                    <img src="https://shree-ram-travels.vercel.app/shree-ram-logo.png" alt="Shree Ram Tour and Travels" style="height: 60px; width: auto; margin-bottom: 10px;" />
                     <h2 style="margin: 10px 0 0 0; font-size: 1.2rem;">${isApproved ? 'E-TICKET CONFIRMED' : 'BOOKING CANCELLED'}</h2>
                 </div>
                 
@@ -294,7 +300,7 @@ const sendCustomerNotification = async (bookingData, status) => {
                 
                 <!-- Footer -->
                 <div style="text-align: center; padding: 15px; background-color: #004d99; color: white;">
-                    <p style="margin: 0; font-size: 0.9rem;">Thank you for choosing Shree Ram Travels!</p>
+                    <p style="margin: 0; font-size: 0.9rem;">Thank you for choosing Shree Ram Tour and Travels!</p>
                     <p style="margin: 5px 0 0 0; font-size: 0.8rem;">Safe Journey & Happy Travels 🚌</p>
                 </div>
             </div>
@@ -327,7 +333,7 @@ const sendNewBookingNotification = async (bookingData) => {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
                 <!-- Header -->
                 <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 20px; text-align: center;">
-                    <h1 style="margin: 0; font-size: 1.8rem;">🚌 Shree Ram Travels</h1>
+                    <img src="https://shree-ram-travels.vercel.app/shree-ram-logo.png" alt="Shree Ram Tour and Travels" style="height: 60px; width: auto; margin-bottom: 10px;" />
                     <h2 style="margin: 10px 0 0 0; font-size: 1.3rem;">🔔 NEW BOOKING RECEIVED</h2>
                 </div>
                 
@@ -396,7 +402,7 @@ const sendNewBookingNotification = async (bookingData) => {
                 
                 <!-- Footer -->
                 <div style="text-align: center; padding: 15px; background-color: #28a745; color: white;">
-                    <p style="margin: 0; font-size: 0.9rem;">Shree Ram Travels - Admin Notification System</p>
+                    <p style="margin: 0; font-size: 0.9rem;">Shree Ram Tour and Travels - Admin Notification System</p>
                     <p style="margin: 5px 0 0 0; font-size: 0.8rem;">Stay updated with real-time booking alerts 📱</p>
                 </div>
             </div>
@@ -731,7 +737,7 @@ app.get('/api/bookings/status/:ts', async (req, res) => {
             
             // Bus provider contact details
             busProvider: {
-                name: 'Shree Ram Travels',
+                name: 'Shree Ram Tour and Travels',
                 phone: '+91 98709 95956',
                 email: 'harishkumarsaini18@gmail.com',
                 address: 'Nathuwa wala, Dehradun, Uttarakhand-248008',

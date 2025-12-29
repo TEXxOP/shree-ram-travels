@@ -21,9 +21,9 @@ function App() {
             <div className="page-container" style={{textAlign: 'center'}}>
                 <Link to="/">
                     <img 
-                        src="https://i.ibb.co/Cs16zCvx/ramb-logo.png" 
-                        alt="Shree Ram Travels Logo" 
-                        style={{height: '60px', width: '220px', borderRadius: '0', display: 'block', margin: '0 auto'}}
+                        src="/shree-ram-logo.png" 
+                        alt="Shree Ram Tour and Travels Logo" 
+                        style={{height: '80px', width: 'auto', borderRadius: '0', display: 'block', margin: '0 auto'}}
                     />
                 </Link>
             </div>

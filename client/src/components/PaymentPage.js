@@ -31,7 +31,7 @@ const PaymentPage = () => {
     
     // --- Bank Details for QR Code / Manual Payment ---
     const bankDetails = {
-        bankName: "Shree Ram Travels Pvt Ltd",
+        bankName: "Shree Ram Tour and Travels Pvt Ltd",
         accountNumber: "42479127271",
         ifscCode: "SBIN0001576",
         upiId: "shrir987090991@barodampay"
