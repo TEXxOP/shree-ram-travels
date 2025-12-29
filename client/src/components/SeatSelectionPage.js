@@ -109,7 +109,6 @@ const SeatSelectionPage = () => {
     const [dataLoaded, setDataLoaded] = useState(false); 
     // NEW: Add state for dynamic pricing
     const [seatPricing, setSeatPricing] = useState({});
-    const [routePricing, setRoutePricing] = useState(null);
 
     const totalAmount = selectedSeats.reduce((sum, seatId) => {
         // Use dynamic pricing if available, fallback to hardcoded prices
@@ -170,7 +169,6 @@ const SeatSelectionPage = () => {
             }
             
             setSeatPricing(pricingMap);
-            // setRoutePricing(response.data.pricing); // Commented out unused variable
         } catch (err) {
             console.error('Error fetching seat pricing:', err);
             // Fallback to hardcoded pricing
