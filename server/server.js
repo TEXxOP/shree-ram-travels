@@ -14,6 +14,9 @@ require('dotenv').config();
 // Import Models
 const Booking = require('./models/Booking');
 const Route = require('./models/Route');
+const Seat = require('./models/Seat');
+const SeatCategory = require('./models/SeatCategory');
+const RoutePrice = require('./models/RoutePrice');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -187,76 +190,112 @@ const sendCustomerNotification = async (bookingData, status) => {
     const msg = {
         to: bookingData.userEmail,
         from: EMAIL_USER,
-        subject: `Booking ${isApproved ? 'Confirmed' : 'Cancelled'} - ${bookingData.TS}`,
+        subject: `${isApproved ? 'E-Ticket Confirmed' : 'Booking Cancelled'} - ${bookingData.TS}`,
         html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <div style="background-color: ${statusColor}; color: white; padding: 20px; text-align: center;">
-                    <h1 style="margin: 0;">Shree Ram Travels</h1>
-                    <h2 style="margin: 10px 0 0 0;">Payment ${statusText}</h2>
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #004d99, #0066cc); color: white; padding: 20px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 1.8rem;">🚌 Shree Ram Travels</h1>
+                    <h2 style="margin: 10px 0 0 0; font-size: 1.2rem;">${isApproved ? 'E-TICKET CONFIRMED' : 'BOOKING CANCELLED'}</h2>
                 </div>
                 
-                <div style="padding: 30px; background-color: #f8f9fa;">
-                    <p style="font-size: 1.1rem;">Dear ${bookingData.userName},</p>
+                <!-- Status Banner -->
+                <div style="background-color: ${statusColor}; color: white; padding: 15px; text-align: center;">
+                    <h3 style="margin: 0; font-size: 1.3rem;">Payment ${statusText}</h3>
+                </div>
+                
+                <!-- Customer Greeting -->
+                <div style="padding: 20px; background-color: #f8f9fa;">
+                    <p style="font-size: 1.1rem; margin: 0;">Dear <strong>${bookingData.userName}</strong>,</p>
                     
                     ${isApproved ? `
-                        <p>Great news! Your payment has been verified and your booking is confirmed! 🎉</p>
+                        <p style="margin: 15px 0;">🎉 Congratulations! Your payment has been verified and your bus ticket is confirmed!</p>
+                        <p style="margin: 0; color: #28a745; font-weight: bold;">This is your official E-Ticket. Please save this email.</p>
                     ` : `
-                        <p>We're sorry, but your payment could not be verified. Your booking has been cancelled.</p>
-                        <p>Please contact us if you believe this is an error.</p>
+                        <p style="margin: 15px 0;">We're sorry, but your payment could not be verified. Your booking has been cancelled.</p>
+                        <p style="margin: 0;">Please contact us if you believe this is an error.</p>
                     `}
                 </div>
                 
+                <!-- E-Ticket Details -->
                 <div style="padding: 20px; background-color: white;">
-                    <h3 style="color: #004d99; border-bottom: 2px solid #004d99; padding-bottom: 10px;">Booking Details</h3>
+                    <h3 style="color: #004d99; border-bottom: 3px solid #004d99; padding-bottom: 10px; margin-bottom: 20px;">
+                        ${isApproved ? '🎫 E-TICKET DETAILS' : '📋 BOOKING DETAILS'}
+                    </h3>
                     
-                    <table style="width: 100%; border-collapse: collapse;">
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                        <tr style="background-color: #004d99; color: white;">
+                            <td style="padding: 12px; font-weight: bold;">Tracking Code (TS)</td>
+                            <td style="padding: 12px; font-weight: bold; font-size: 1.3rem; letter-spacing: 2px;">${bookingData.TS}</td>
+                        </tr>
                         <tr>
-                            <td style="padding: 8px; font-weight: bold;">Tracking Code (TS):</td>
-                            <td style="padding: 8px; color: ${statusColor}; font-weight: bold; font-size: 1.2rem;">${bookingData.TS}</td>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Passenger Name</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${bookingData.userName}</td>
                         </tr>
                         <tr style="background-color: #f8f9fa;">
-                            <td style="padding: 8px; font-weight: bold;">Status:</td>
-                            <td style="padding: 8px; color: ${statusColor}; font-weight: bold;">${status}</td>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Route</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">${bookingData.departureCity} → ${bookingData.destinationCity}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; font-weight: bold;">Route:</td>
-                            <td style="padding: 8px;">${bookingData.departureCity} → ${bookingData.destinationCity}</td>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Travel Date</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #004d99;">${new Date(bookingData.departureDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
                         </tr>
                         <tr style="background-color: #f8f9fa;">
-                            <td style="padding: 8px; font-weight: bold;">Date:</td>
-                            <td style="padding: 8px;">${new Date(bookingData.departureDate).toLocaleDateString()}</td>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Departure Time</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #004d99;">${bookingData.departureTime}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; font-weight: bold;">Time:</td>
-                            <td style="padding: 8px;">${bookingData.departureTime}</td>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Seat Numbers</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #28a745;">${bookingData.selectedSeats.join(', ')}</td>
                         </tr>
                         <tr style="background-color: #f8f9fa;">
-                            <td style="padding: 8px; font-weight: bold;">Seats:</td>
-                            <td style="padding: 8px;">${bookingData.selectedSeats.join(', ')}</td>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Total Amount</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; font-size: 1.2rem; color: #28a745;">₹${bookingData.totalAmount.toFixed(2)}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; font-weight: bold;">Amount:</td>
-                            <td style="padding: 8px; font-weight: bold; font-size: 1.1rem;">₹${bookingData.totalAmount.toFixed(2)}</td>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Payment Status</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: ${statusColor};">${status}</td>
+                        </tr>
+                        <tr style="background-color: #f8f9fa;">
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Contact Number</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${bookingData.userPhone}</td>
                         </tr>
                     </table>
                 </div>
                 
                 ${isApproved ? `
-                    <div style="padding: 20px; background-color: #d4edda; border-left: 4px solid #28a745; margin: 20px 0;">
-                        <p style="margin: 0; font-weight: bold;">✅ Your ticket is confirmed!</p>
-                        <p style="margin: 10px 0 0 0;">Please arrive at the boarding point 15 minutes before departure.</p>
+                    <!-- Important Instructions -->
+                    <div style="padding: 20px; background-color: #d4edda; border-left: 5px solid #28a745; margin: 0;">
+                        <h4 style="margin: 0 0 15px 0; color: #155724;">📋 IMPORTANT INSTRUCTIONS</h4>
+                        <ul style="margin: 0; padding-left: 20px; color: #155724;">
+                            <li>Please arrive at the boarding point <strong>15 minutes before departure</strong></li>
+                            <li>Carry a valid ID proof along with this e-ticket</li>
+                            <li>Keep your tracking code <strong>${bookingData.TS}</strong> handy for reference</li>
+                            <li>Contact us immediately if you need to make any changes</li>
+                        </ul>
                     </div>
                 ` : `
-                    <div style="padding: 20px; background-color: #f8d7da; border-left: 4px solid #dc3545; margin: 20px 0;">
-                        <p style="margin: 0; font-weight: bold;">Need Help?</p>
-                        <p style="margin: 10px 0 0 0;">Contact us: +91 98709 95956</p>
+                    <!-- Cancellation Notice -->
+                    <div style="padding: 20px; background-color: #f8d7da; border-left: 5px solid #dc3545; margin: 0;">
+                        <h4 style="margin: 0 0 15px 0; color: #721c24;">❌ BOOKING CANCELLED</h4>
+                        <p style="margin: 0; color: #721c24;">If you believe this is an error, please contact us immediately with your tracking code.</p>
                     </div>
                 `}
                 
-                <div style="text-align: center; padding: 20px; background-color: #343a40; color: white;">
-                    <p style="margin: 0;">Shree Ram Travels</p>
-                    <p style="margin: 5px 0; font-size: 0.9rem;">Nathuwa wala, Dehradun, Uttarakhand-248008</p>
-                    <p style="margin: 5px 0; font-size: 0.9rem;">Phone: +91 98709 95956</p>
+                <!-- Contact Information -->
+                <div style="padding: 20px; background-color: #e9ecef; text-align: center;">
+                    <h4 style="margin: 0 0 15px 0; color: #004d99;">📞 CONTACT INFORMATION</h4>
+                    <p style="margin: 5px 0; font-weight: bold;">Shree Ram Travels</p>
+                    <p style="margin: 5px 0;">📧 Email: harishkumarsaini18@gmail.com</p>
+                    <p style="margin: 5px 0;">📱 Phone: +91 98709 95956</p>
+                    <p style="margin: 5px 0;">📍 Address: Nathuwa wala, Dehradun, Uttarakhand-248008</p>
+                    <p style="margin: 15px 0 5px 0; font-size: 0.9rem; color: #6c757d;">For any queries or support, contact us anytime</p>
+                </div>
+                
+                <!-- Footer -->
+                <div style="text-align: center; padding: 15px; background-color: #004d99; color: white;">
+                    <p style="margin: 0; font-size: 0.9rem;">Thank you for choosing Shree Ram Travels!</p>
+                    <p style="margin: 5px 0 0 0; font-size: 0.8rem;">Safe Journey & Happy Travels 🚌</p>
                 </div>
             </div>
         `,
@@ -270,6 +309,109 @@ const sendCustomerNotification = async (bookingData, status) => {
         console.error('❌ Error sending customer notification:', error.message);
         if (error.response) {
             console.error('SendGrid error:', error.response.body);
+        }
+    }
+};
+
+// NEW: Send notification to admin when a new booking is created
+const sendNewBookingNotification = async (bookingData) => {
+    const recipients = ADMIN_EMAIL.includes(',') 
+        ? ADMIN_EMAIL.split(',').map(email => email.trim())
+        : ADMIN_EMAIL;
+    
+    const msg = {
+        to: recipients,
+        from: EMAIL_USER,
+        subject: `🔔 NEW BOOKING ALERT - ${bookingData.TS}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 20px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 1.8rem;">🚌 Shree Ram Travels</h1>
+                    <h2 style="margin: 10px 0 0 0; font-size: 1.3rem;">🔔 NEW BOOKING RECEIVED</h2>
+                </div>
+                
+                <!-- Alert Banner -->
+                <div style="background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin: 0;">
+                    <p style="margin: 0; font-weight: bold; color: #856404;">
+                        📋 A new booking has been created and is awaiting payment proof submission.
+                    </p>
+                </div>
+                
+                <!-- Booking Summary -->
+                <div style="padding: 20px; background-color: white;">
+                    <h3 style="color: #28a745; border-bottom: 3px solid #28a745; padding-bottom: 10px; margin-bottom: 20px;">
+                        📊 BOOKING SUMMARY
+                    </h3>
+                    
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                        <tr style="background-color: #28a745; color: white;">
+                            <td style="padding: 12px; font-weight: bold;">Tracking Code (TS)</td>
+                            <td style="padding: 12px; font-weight: bold; font-size: 1.3rem; letter-spacing: 2px;">${bookingData.TS}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd;">Booking Status</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; color: #ffc107; font-weight: bold;">⏳ PENDING PAYMENT</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Trip Details -->
+                <div style="padding: 20px; background-color: #f8f9fa;">
+                    <h3 style="color: #004d99; border-bottom: 3px solid #004d99; padding-bottom: 10px; margin-bottom: 20px;">
+                        🚌 TRIP DETAILS
+                    </h3>
+                    
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+                        <tr>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd; background-color: white;">Route</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background-color: white;">${bookingData.departureCity} → ${bookingData.destinationCity}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd; background-color: #f8f9fa;">Travel Date</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #004d99; background-color: #f8f9fa;">${new Date(bookingData.departureDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd; background-color: white;">Departure Time</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #004d99; background-color: white;">${bookingData.departureTime}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd; background-color: #f8f9fa;">Passengers</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background-color: #f8f9fa;">${bookingData.passengers}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd; background-color: white;">Selected Seats</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #28a745; background-color: white;">${bookingData.selectedSeats.join(', ')}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd; background-color: #f8f9fa;">Total Amount</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; font-size: 1.2rem; color: #28a745; background-color: #f8f9fa;">₹${bookingData.totalAmount.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; font-weight: bold; border: 1px solid #ddd; background-color: white;">Booking Time</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; background-color: white;">${new Date(bookingData.bookingDate).toLocaleString('en-IN')}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Footer -->
+                <div style="text-align: center; padding: 15px; background-color: #28a745; color: white;">
+                    <p style="margin: 0; font-size: 0.9rem;">Shree Ram Travels - Admin Notification System</p>
+                    <p style="margin: 5px 0 0 0; font-size: 0.8rem;">Stay updated with real-time booking alerts 📱</p>
+                </div>
+            </div>
+        `,
+    };
+
+    try {
+        await sgMail.send(msg);
+        console.log('✅ New booking notification sent to admin via SendGrid!');
+        console.log('📧 Email sent to:', ADMIN_EMAIL);
+        console.log('📋 New Booking TS:', bookingData.TS);
+    } catch (error) {
+        console.error('❌ Error sending new booking notification:', error.message);
+        if (error.response) {
+            console.error('SendGrid error details:', error.response.body);
         }
     }
 };
@@ -346,6 +488,9 @@ app.post('/api/bookings/initiate', async (req, res) => {
         });
 
         await initialBooking.save();
+
+        // Send new booking notification to admin
+        await sendNewBookingNotification(initialBooking);
 
         res.status(201).json({ 
             message: 'Booking initiated. Please select seats.',
@@ -548,18 +693,61 @@ app.get('/api/seats/occupied', async (req, res) => {
     }
 });
 
-// 7. GET /api/bookings/status/:ts (Route to check booking status by TS number)
+// 7. GET /api/bookings/status/:ts (Enhanced route to check booking status with full details)
 app.get('/api/bookings/status/:ts', async (req, res) => {
     try {
         const tsNumber = req.params.ts;
         
-        const booking = await Booking.findOne({ TS: tsNumber }).select('paymentStatus totalAmount TS'); 
+        // Get full booking details instead of limited fields
+        const booking = await Booking.findOne({ TS: tsNumber }); 
         
         if (!booking) {
             return res.status(404).json({ message: 'Tracking Number not found.' });
         }
 
-        res.json({ status: booking.paymentStatus, amount: booking.totalAmount, tsNumber: booking.TS });
+        // Enhanced response with all requested details
+        const trackingDetails = {
+            // Basic tracking info
+            tsNumber: booking.TS,
+            status: booking.paymentStatus,
+            amount: booking.totalAmount,
+            
+            // Passenger details
+            passengerName: booking.userName || 'Not provided',
+            contactNumber: booking.userPhone || 'Not provided',
+            email: booking.userEmail || 'Not provided',
+            
+            // Trip details
+            route: `${booking.departureCity} → ${booking.destinationCity}`,
+            pickupLocation: booking.departureCity,
+            dropLocation: booking.destinationCity,
+            travelDate: booking.departureDate,
+            departureTime: booking.departureTime,
+            selectedSeats: booking.selectedSeats,
+            passengers: booking.passengers,
+            
+            // Booking metadata
+            bookingDate: booking.bookingDate,
+            
+            // Bus provider contact details
+            busProvider: {
+                name: 'Shree Ram Travels',
+                phone: '+91 98709 95956',
+                email: 'harishkumarsaini18@gmail.com',
+                address: 'Nathuwa wala, Dehradun, Uttarakhand-248008',
+                website: 'https://shree-ram-travels.vercel.app'
+            },
+            
+            // Status-specific information
+            statusInfo: {
+                isPaid: booking.paymentStatus === 'Paid',
+                isPending: booking.paymentStatus === 'Pending',
+                isProcessing: booking.paymentStatus === 'Processing',
+                isCancelled: booking.paymentStatus === 'Cancelled'
+            }
+        };
+
+        res.json(trackingDetails);
         
     } catch(error) {
         console.error('Error retrieving booking status:', error);
@@ -709,6 +897,267 @@ app.get('/api/bookings/:id/ts', async (req, res) => {
         res.status(500).json({ message: 'Internal server error while retrieving status.' });
     }
 });
+
+// ============================================
+// SEAT MANAGEMENT ENDPOINTS (Admin Only)
+// ============================================
+
+// GET /api/admin/seats/route/:routeId - Get all seats for a specific route and time
+app.get('/api/admin/seats/route/:routeId', verifyAdminToken, async (req, res) => {
+    try {
+        const { routeId } = req.params;
+        const { departureTime, departureDate } = req.query;
+
+        if (!departureTime || !departureDate) {
+            return res.status(400).json({ 
+                message: 'departureTime and departureDate are required' 
+            });
+        }
+
+        const seats = await Seat.find({
+            routeId,
+            departureTime,
+            createdAt: {
+                $gte: new Date(departureDate),
+                $lt: new Date(new Date(departureDate).getTime() + 24 * 60 * 60 * 1000)
+            }
+        }).sort({ deck: 1, row: 1, column: 1 });
+
+        res.json({ seats, totalSeats: seats.length });
+    } catch (error) {
+        console.error('Error fetching seats:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// PUT /api/admin/seats/:seatId/block - Block a seat
+app.put('/api/admin/seats/:seatId/block', verifyAdminToken, async (req, res) => {
+    try {
+        const { seatId } = req.params;
+        const { reason, blockedUntil } = req.body;
+
+        if (!reason) {
+            return res.status(400).json({ message: 'Reason for blocking is required' });
+        }
+
+        const seat = await Seat.findByIdAndUpdate(
+            seatId,
+            {
+                isBlocked: true,
+                status: 'blocked',
+                blockedReason: reason,
+                blockedUntil: blockedUntil || null
+            },
+            { new: true }
+        );
+
+        if (!seat) {
+            return res.status(404).json({ message: 'Seat not found' });
+        }
+
+        res.json({ message: 'Seat blocked successfully', seat });
+    } catch (error) {
+        console.error('Error blocking seat:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// PUT /api/admin/seats/:seatId/unblock - Unblock a seat
+app.put('/api/admin/seats/:seatId/unblock', verifyAdminToken, async (req, res) => {
+    try {
+        const { seatId } = req.params;
+
+        const seat = await Seat.findByIdAndUpdate(
+            seatId,
+            {
+                isBlocked: false,
+                status: 'available',
+                blockedReason: null,
+                blockedUntil: null
+            },
+            { new: true }
+        );
+
+        if (!seat) {
+            return res.status(404).json({ message: 'Seat not found' });
+        }
+
+        res.json({ message: 'Seat unblocked successfully', seat });
+    } catch (error) {
+        console.error('Error unblocking seat:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// PUT /api/admin/seats/:seatId/price - Update seat price
+app.put('/api/admin/seats/:seatId/price', verifyAdminToken, async (req, res) => {
+    try {
+        const { seatId } = req.params;
+        const { currentPrice } = req.body;
+
+        if (!currentPrice || currentPrice <= 0) {
+            return res.status(400).json({ message: 'Valid price is required' });
+        }
+
+        const seat = await Seat.findByIdAndUpdate(
+            seatId,
+            { currentPrice },
+            { new: true }
+        );
+
+        if (!seat) {
+            return res.status(404).json({ message: 'Seat not found' });
+        }
+
+        res.json({ message: 'Seat price updated', seat });
+    } catch (error) {
+        console.error('Error updating seat price:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// POST /api/admin/seats/bulk-block - Block multiple seats at once
+app.post('/api/admin/seats/bulk-block', verifyAdminToken, async (req, res) => {
+    try {
+        const { seatIds, reason, blockedUntil } = req.body;
+
+        if (!Array.isArray(seatIds) || seatIds.length === 0) {
+            return res.status(400).json({ message: 'seatIds array is required' });
+        }
+
+        const result = await Seat.updateMany(
+            { _id: { $in: seatIds } },
+            {
+                isBlocked: true,
+                status: 'blocked',
+                blockedReason: reason || 'Bulk blocked',
+                blockedUntil: blockedUntil || null
+            }
+        );
+
+        res.json({ 
+            message: `${result.modifiedCount} seats blocked successfully`,
+            modifiedCount: result.modifiedCount
+        });
+    } catch (error) {
+        console.error('Error bulk blocking seats:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ============================================
+// PRICING MANAGEMENT ENDPOINTS (Admin Only)
+// ============================================
+
+// POST /api/admin/pricing/route/:routeId - Set pricing for a route/time
+app.post('/api/admin/pricing/route/:routeId', verifyAdminToken, async (req, res) => {
+    try {
+        const { routeId } = req.params;
+        const { departureTime, basePriceUpper, basePriceLower, surgeMultiplier, effectiveDate, expiryDate } = req.body;
+
+        const pricing = new RoutePrice({
+            routeId,
+            departureTime,
+            basePriceUpper,
+            basePriceLower,
+            surgeMultiplier: surgeMultiplier || 1.0,
+            effectiveDate,
+            expiryDate
+        });
+
+        await pricing.save();
+        res.status(201).json({ message: 'Pricing created', pricing });
+    } catch (error) {
+        console.error('Error creating pricing:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// GET /api/admin/pricing/route/:routeId - Get pricing for a route
+app.get('/api/admin/pricing/route/:routeId', verifyAdminToken, async (req, res) => {
+    try {
+        const { routeId } = req.params;
+
+        const pricing = await RoutePrice.find({ routeId, isActive: true });
+        res.json({ pricing });
+    } catch (error) {
+        console.error('Error fetching pricing:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// PUT /api/admin/pricing/:priceId - Update pricing
+app.put('/api/admin/pricing/:priceId', verifyAdminToken, async (req, res) => {
+    try {
+        const { priceId } = req.params;
+        const { basePriceUpper, basePriceLower, surgeMultiplier } = req.body;
+
+        const pricing = await RoutePrice.findByIdAndUpdate(
+            priceId,
+            { basePriceUpper, basePriceLower, surgeMultiplier },
+            { new: true }
+        );
+
+        if (!pricing) {
+            return res.status(404).json({ message: 'Pricing not found' });
+        }
+
+        res.json({ message: 'Pricing updated', pricing });
+    } catch (error) {
+        console.error('Error updating pricing:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ============================================
+// SEAT AVAILABILITY ENDPOINTS (Public)
+// ============================================
+
+// GET /api/seats/availability/:routeId - Get seat availability with pricing for a specific trip
+app.get('/api/seats/availability/:routeId', async (req, res) => {
+    try {
+        const { routeId } = req.params;
+        const { departureTime, departureDate } = req.query;
+
+        if (!departureTime || !departureDate) {
+            return res.status(400).json({ 
+                message: 'departureTime and departureDate are required' 
+            });
+        }
+
+        // Get all seats for this trip
+        const seats = await Seat.find({
+            routeId,
+            departureTime,
+            createdAt: {
+                $gte: new Date(departureDate),
+                $lt: new Date(new Date(departureDate).getTime() + 24 * 60 * 60 * 1000)
+            }
+        });
+
+        // Get pricing info
+        const pricing = await RoutePrice.findOne({
+            routeId,
+            departureTime,
+            effectiveDate: { $lte: new Date(departureDate) },
+            expiryDate: { $gte: new Date(departureDate) },
+            isActive: true
+        });
+
+        res.json({ 
+            seats,
+            pricing,
+            totalSeats: seats.length,
+            availableSeats: seats.filter(s => s.status === 'available').length,
+            occupiedSeats: seats.filter(s => s.status === 'occupied').length,
+            blockedSeats: seats.filter(s => s.status === 'blocked').length
+        });
+    } catch (error) {
+        console.error('Error fetching seat availability:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

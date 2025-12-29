@@ -263,21 +263,94 @@ const HomePage = () => {
                     {trackError && <p className="error-message" style={{marginTop: '15px'}}>{trackError}</p>}
                     
                     {trackResult && (
-                        <div style={{marginTop: '20px', padding: '15px', borderTop: '1px solid #eee'}}>
-                            <p style={{fontWeight: 'bold'}}>Tracking Code:</p>
-                            <span style={{fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--primary-blue)'}}>
-                                {trackResult.tsNumber}
-                            </span>
-                            <p style={{fontWeight: 'bold'}}>Payment Status:</p>
-                            <span className={`status-${trackResult.status.toLowerCase()}`} style={{fontSize: '1.2rem'}}>
-                                {trackResult.status}
-                            </span>
-                            <p>Amount: ₹{trackResult.amount.toFixed(2)}</p>
+                        <div style={{marginTop: '20px', padding: '20px', borderTop: '2px solid #004d99', backgroundColor: '#f8f9fa', borderRadius: '8px'}}>
+                            <h3 style={{color: '#004d99', marginBottom: '20px', borderBottom: '1px solid #ddd', paddingBottom: '10px'}}>
+                                🎫 Booking Details
+                            </h3>
                             
+                            {/* Tracking Code */}
+                            <div style={{marginBottom: '15px'}}>
+                                <p style={{fontWeight: 'bold', margin: '0 0 5px 0'}}>Tracking Code (TS):</p>
+                                <span style={{fontWeight: 'bold', fontSize: '1.3rem', color: '#004d99', letterSpacing: '2px', backgroundColor: 'white', padding: '5px 10px', borderRadius: '4px', border: '2px solid #004d99'}}>
+                                    {trackResult.tsNumber}
+                                </span>
+                            </div>
+
+                            {/* Payment Status */}
+                            <div style={{marginBottom: '15px'}}>
+                                <p style={{fontWeight: 'bold', margin: '0 0 5px 0'}}>Payment Status:</p>
+                                <span className={`status-${trackResult.status.toLowerCase()}`} style={{
+                                    fontSize: '1.1rem', 
+                                    fontWeight: 'bold',
+                                    padding: '5px 12px',
+                                    borderRadius: '20px',
+                                    backgroundColor: trackResult.status === 'Paid' ? '#28a745' : trackResult.status === 'Processing' ? '#ffc107' : '#dc3545',
+                                    color: 'white'
+                                }}>
+                                    {trackResult.status === 'Paid' ? '✅ CONFIRMED' : 
+                                     trackResult.status === 'Processing' ? '⏳ PROCESSING' : 
+                                     trackResult.status === 'Pending' ? '⏳ PENDING' : '❌ CANCELLED'}
+                                </span>
+                            </div>
+
+                            {/* Passenger Information */}
+                            <div style={{marginBottom: '20px'}}>
+                                <h4 style={{color: '#28a745', marginBottom: '10px'}}>👤 Passenger Information</h4>
+                                <div style={{backgroundColor: 'white', padding: '15px', borderRadius: '6px', border: '1px solid #ddd'}}>
+                                    <p><strong>Name:</strong> {trackResult.passengerName}</p>
+                                    <p><strong>Contact:</strong> {trackResult.contactNumber}</p>
+                                    <p><strong>Email:</strong> {trackResult.email}</p>
+                                </div>
+                            </div>
+
+                            {/* Trip Details */}
+                            <div style={{marginBottom: '20px'}}>
+                                <h4 style={{color: '#007bff', marginBottom: '10px'}}>🚌 Trip Details</h4>
+                                <div style={{backgroundColor: 'white', padding: '15px', borderRadius: '6px', border: '1px solid #ddd'}}>
+                                    <p><strong>Route:</strong> {trackResult.route}</p>
+                                    <p><strong>Pickup Location:</strong> {trackResult.pickupLocation}</p>
+                                    <p><strong>Drop Location:</strong> {trackResult.dropLocation}</p>
+                                    <p><strong>Travel Date:</strong> {new Date(trackResult.travelDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                    <p><strong>Departure Time:</strong> {trackResult.departureTime}</p>
+                                    <p><strong>Seat Numbers:</strong> <span style={{color: '#28a745', fontWeight: 'bold'}}>{trackResult.selectedSeats.join(', ')}</span></p>
+                                    <p><strong>Total Amount:</strong> <span style={{color: '#28a745', fontWeight: 'bold', fontSize: '1.1rem'}}>₹{trackResult.amount.toFixed(2)}</span></p>
+                                </div>
+                            </div>
+
+                            {/* Bus Provider Contact */}
+                            <div style={{marginBottom: '15px'}}>
+                                <h4 style={{color: '#6f42c1', marginBottom: '10px'}}>📞 Bus Provider Contact</h4>
+                                <div style={{backgroundColor: 'white', padding: '15px', borderRadius: '6px', border: '1px solid #ddd'}}>
+                                    <p><strong>Company:</strong> {trackResult.busProvider.name}</p>
+                                    <p><strong>Phone:</strong> <a href={`tel:${trackResult.busProvider.phone}`} style={{color: '#007bff', textDecoration: 'none'}}>{trackResult.busProvider.phone}</a></p>
+                                    <p><strong>Email:</strong> <a href={`mailto:${trackResult.busProvider.email}`} style={{color: '#007bff', textDecoration: 'none'}}>{trackResult.busProvider.email}</a></p>
+                                    <p><strong>Address:</strong> {trackResult.busProvider.address}</p>
+                                </div>
+                            </div>
+                            
+                            {/* Status-specific messages */}
                             {trackResult.status === 'Processing' && (
-                                <p style={{color: 'orange', fontSize: '0.9rem', marginTop: '10px'}}>
-                                    We are manually verifying your payment proof. Please allow up to 30 minutes.
-                                </p>
+                                <div style={{backgroundColor: '#fff3cd', border: '1px solid #ffc107', borderRadius: '6px', padding: '15px', marginTop: '15px'}}>
+                                    <p style={{color: '#856404', fontSize: '0.9rem', margin: '0', fontWeight: 'bold'}}>
+                                        ⏳ We are manually verifying your payment proof. Please allow up to 30 minutes.
+                                    </p>
+                                </div>
+                            )}
+                            
+                            {trackResult.status === 'Paid' && (
+                                <div style={{backgroundColor: '#d4edda', border: '1px solid #28a745', borderRadius: '6px', padding: '15px', marginTop: '15px'}}>
+                                    <p style={{color: '#155724', fontSize: '0.9rem', margin: '0', fontWeight: 'bold'}}>
+                                        ✅ Your ticket is confirmed! Please arrive 15 minutes before departure.
+                                    </p>
+                                </div>
+                            )}
+
+                            {trackResult.status === 'Pending' && (
+                                <div style={{backgroundColor: '#fff3cd', border: '1px solid #ffc107', borderRadius: '6px', padding: '15px', marginTop: '15px'}}>
+                                    <p style={{color: '#856404', fontSize: '0.9rem', margin: '0', fontWeight: 'bold'}}>
+                                        ⏳ Please complete your payment and upload the proof to confirm your booking.
+                                    </p>
+                                </div>
                             )}
                         </div>
                     )}

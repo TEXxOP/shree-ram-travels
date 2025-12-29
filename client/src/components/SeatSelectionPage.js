@@ -15,65 +15,81 @@ const UPPER_PRICE = 599.00;
 // const TOTAL_SEATS = 40; // Not used - calculated from layout
 // ---------------------
 
-// --- ADVANCED SEAT LAYOUT STRUCTURE ---
+// --- NEW SEAT LAYOUT STRUCTURE (Based on your image) ---
 const SEAT_MAP_LAYOUT = {
-    // Upper Deck (20 seats, 4 rows of 4 + 4 singles)
-    UpperDeck: [
-        // Row 1: Single | Aisle | Pair | Pair | Steering Wheel/Gap
-        ['U-A1', null, 'U-C1', 'U-D1', 'WHEEL'], 
-        // Row 2: Single | Aisle | Pair | Pair
-        ['U-A2', null, 'U-C2', 'U-D2', null], 
-        ['U-A3', null, 'U-C3', 'U-D3', null], 
-        ['U-A4', null, 'U-C4', 'U-D4', null],
-        ['U-A5', null, 'U-C5', 'U-D5', null],
-        ['U-A6', null, 'U-C6', 'U-D6', null],
-        // Back Row: Pair | Pair (A, B, C, D)
-        ['U-A7', 'U-B7', 'U-C7', 'U-D7', null],
-    ],
-    // Lower Deck (20 seats)
+    // Lower Deck (Left side - 22 seats)
     LowerDeck: [
-        // Row 1: Single | Aisle | Pair | Pair | Steering Wheel/Gap
-        ['L-A1', null, 'L-C1', 'L-D1', 'WHEEL'], 
-        ['L-A2', null, 'L-C2', 'L-D2', null], 
-        ['L-A3', null, 'L-C3', 'L-D3', null], 
-        ['L-A4', null, 'L-C4', 'L-D4', null],
-        ['L-A5', null, 'L-C5', 'L-D5', null],
-        ['L-A6', null, 'L-C6', 'L-D6', null],
-        // Back Row: Pair | Pair 
-        ['L-A7', 'L-B7', 'L-C7', 'L-D7', null],
+        // Row 1: Single | Pair | Pair
+        ['L-A1', 'L-B1', 'L-C1'], 
+        // Row 2: Single (blocked) | Pair
+        ['L-A2-BLOCKED', 'L-B2', 'L-C2'], 
+        // Row 3: Single (blocked) | Pair
+        ['L-A3-BLOCKED', 'L-B3', 'L-C3'], 
+        // Row 4: Single | Pair (blocked)
+        ['L-A4', 'L-B4-BLOCKED', 'L-C4-BLOCKED'],
+        // Row 5: Single (blocked) | Pair
+        ['L-A5-BLOCKED', 'L-B5', 'L-C5'],
+        // Row 6: Single (back row)
+        ['L-A6'],
+    ],
+    // Upper Deck (Right side - 22 seats)  
+    UpperDeck: [
+        // Row 1: Single | Pair | Pair
+        ['U-A1', 'U-B1', 'U-C1'], 
+        // Row 2: Single (blocked) | Pair
+        ['U-A2-BLOCKED', 'U-B2', 'U-C2'], 
+        // Row 3: Single | Pair
+        ['U-A3', 'U-B3', 'U-C3'], 
+        // Row 4: Single | Pair (blocked)
+        ['U-A4', 'U-B4-BLOCKED', 'U-C4-BLOCKED'],
+        // Row 5: Single (blocked) | Pair
+        ['U-A5-BLOCKED', 'U-B5', 'U-C5'],
+        // Row 6: Single (back row)
+        ['U-A6'],
     ],
 };
 // ----------------------------------------------------
 
 
 // --- SEAT COMPONENT ---
-const Seat = ({ id, price, status, onClick, deck }) => {
+const Seat = ({ id, price, status, onClick, deck, isBlocked }) => {
     let className = 'seat-button';
-    if (status === 'occupied') className += ' occupied';
+    if (status === 'occupied' || isBlocked) className += ' occupied';
     else if (status === 'selected') className += ' selected';
     
-    // Add specific style to single seats (A-column) for the visual effect
-    const isSingle = id && id.includes('-A') && !id.includes('-B');
+    // Handle blocked seats from layout
+    const seatIsBlocked = id && id.includes('BLOCKED');
+    const cleanId = id ? id.replace('-BLOCKED', '') : '';
 
     return (
         <button
-            key={id}
+            key={cleanId}
             className={className}
             onClick={onClick}
-            disabled={status === 'occupied'}
+            disabled={status === 'occupied' || seatIsBlocked || isBlocked}
             style={{
-                width: isSingle ? '40px' : '60px', // Smaller width for single seats
-                height: '60px',
-                margin: '5px',
+                width: '60px',
+                height: '80px', // Taller seats like in the image
+                margin: '3px',
                 flexShrink: 0,
-                backgroundColor: status === 'occupied' ? '#dc3545' : status === 'selected' ? 'var(--accent-green)' : deck === 'UpperDeck' ? '#cfe2ff' : '#d1f0d8' // Different color per deck
+                backgroundColor: (status === 'occupied' || seatIsBlocked || isBlocked) ? '#dc3545' : 
+                               status === 'selected' ? 'var(--accent-green)' : 
+                               deck === 'UpperDeck' ? '#e3f2fd' : '#f3e5f5', // Light blue for upper, light purple for lower
+                border: '2px solid #ddd',
+                borderRadius: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                fontSize: '0.75rem',
+                fontWeight: 'bold'
             }}
         >
-            <span style={{fontSize: '0.7rem'}}>{id.replace(/-/g, '')}</span>
-            <span style={{fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginTop: '3px'}}>
-                {price ? `₹${price.toFixed(0)}` : ''}
+            <span style={{fontSize: '0.7rem', color: '#666'}}>{cleanId.replace(/-/g, '')}</span>
+            <span style={{fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginTop: '2px'}}>
+                {price && !seatIsBlocked ? `₹${price.toFixed(0)}` : ''}
             </span>
-            {status === 'occupied' && <span style={{fontSize: '0.7rem'}}>Sold</span>}
+            {(status === 'occupied' || seatIsBlocked) && <span style={{fontSize: '0.6rem', color: '#fff'}}>N/A</span>}
         </button>
     );
 };
@@ -91,9 +107,13 @@ const SeatSelectionPage = () => {
     const [tripDetails, setTripDetails] = useState(null); 
     // FIX 2: Initialize dataLoaded to false
     const [dataLoaded, setDataLoaded] = useState(false); 
+    // NEW: Add state for dynamic pricing
+    const [seatPricing, setSeatPricing] = useState({});
+    const [routePricing, setRoutePricing] = useState(null);
 
     const totalAmount = selectedSeats.reduce((sum, seatId) => {
-        const price = seatId.startsWith('U-') ? UPPER_PRICE : LOWER_PRICE;
+        // Use dynamic pricing if available, fallback to hardcoded prices
+        const price = seatPricing[seatId] || (seatId.startsWith('U-') ? UPPER_PRICE : LOWER_PRICE);
         return sum + price;
     }, 0);
 
@@ -117,6 +137,54 @@ const SeatSelectionPage = () => {
         } finally {
             setLoading(false);
             setDataLoaded(true);
+        }
+    };
+
+    // NEW: Fetch seat pricing from API
+    const fetchSeatPricing = async (routeId, departureTime, departureDate) => {
+        try {
+            const response = await axios.get(
+                `${RENDER_API_URL}/api/seats/availability/${routeId}`,
+                { params: { departureTime, departureDate } }
+            );
+            
+            // Build pricing map from seat data
+            const pricingMap = {};
+            if (response.data.seats && response.data.seats.length > 0) {
+                response.data.seats.forEach(seat => {
+                    pricingMap[seat.seatId] = seat.currentPrice;
+                });
+            } else {
+                // Fallback to hardcoded prices if no seat data
+                console.log('No seat data found, using fallback pricing');
+                // Generate fallback pricing for all seats
+                Object.values(SEAT_MAP_LAYOUT).flat().forEach(row => {
+                    if (Array.isArray(row)) {
+                        row.forEach(seatId => {
+                            if (seatId && seatId !== 'WHEEL') {
+                                pricingMap[seatId] = seatId.startsWith('U-') ? UPPER_PRICE : LOWER_PRICE;
+                            }
+                        });
+                    }
+                });
+            }
+            
+            setSeatPricing(pricingMap);
+            // setRoutePricing(response.data.pricing); // Commented out unused variable
+        } catch (err) {
+            console.error('Error fetching seat pricing:', err);
+            // Fallback to hardcoded pricing
+            const fallbackPricing = {};
+            Object.values(SEAT_MAP_LAYOUT).flat().forEach(row => {
+                if (Array.isArray(row)) {
+                    row.forEach(seatId => {
+                        if (seatId && seatId !== 'WHEEL') {
+                            fallbackPricing[seatId] = seatId.startsWith('U-') ? UPPER_PRICE : LOWER_PRICE;
+                        }
+                    });
+                }
+            });
+            setSeatPricing(fallbackPricing);
         }
     };
     // ----------------------------------------------------
@@ -152,6 +220,9 @@ const SeatSelectionPage = () => {
         // Only fetch occupied seats if data hasn't been loaded yet
         if (!dataLoaded) { 
             fetchOccupiedSeats(storedDestination, storedDate, storedTime);
+            // Also fetch pricing data - we'll need to get routeId from routes
+            // For now, use a placeholder routeId or fetch from routes API
+            fetchSeatPricing('placeholder-route-id', storedTime, storedDate);
         }
         
     }, [bookingId, userToken, navigate, dataLoaded, tripDetails]);
@@ -211,35 +282,62 @@ const SeatSelectionPage = () => {
             setLoading(false);
         }
     };
-    
+    // NEW: Add state for price filtering
+    const [priceFilter, setPriceFilter] = useState('All');
+    // const [availablePrices, setAvailablePrices] = useState(['All', '₹1199', '₹1299']); // Commented out unused variable
+
     // Helper function to render a deck
     const renderDeck = (deckName, layout) => (
-        <div key={deckName} style={{ marginBottom: '40px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
-            <h3 style={{ borderBottom: '2px solid var(--primary-blue)', paddingBottom: '10px', marginBottom: '15px', color: 'var(--primary-blue)' }}>
-                {deckName.replace(/([A-Z])/g, ' $1').trim()}
+        <div key={deckName} style={{
+            flex: '1', 
+            maxWidth: '220px', 
+            margin: '10px',
+            padding: '15px',
+            border: '2px solid #ddd',
+            borderRadius: '12px',
+            backgroundColor: '#fafafa'
+        }}>
+            <h3 style={{
+                textAlign: 'center', 
+                margin: '0 0 15px 0', 
+                color: deckName === 'UpperDeck' ? '#1976d2' : '#7b1fa2',
+                fontSize: '1.1rem',
+                fontWeight: 'bold'
+            }}>
+                {deckName === 'UpperDeck' ? 'Upper' : 'Lower'}
+                {deckName === 'UpperDeck' && <span style={{fontSize: '1.5rem', marginLeft: '10px'}}>🚗</span>}
             </h3>
             
             {layout.map((row, rowIndex) => (
-                <div key={rowIndex} style={{ display: 'flex', justifyContent: 'center', margin: '5px 0' }}>
+                <div key={rowIndex} style={{
+                    display: 'flex', 
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: '5px',
+                    gap: '5px'
+                }}>
                     {row.map((seatId, colIndex) => {
-                        if (seatId === null) {
-                            return <div key={colIndex} style={{ width: '40px', margin: '5px' }}></div>; // Aisle Space
-                        }
-                        if (seatId === 'WHEEL') {
-                            return <div key={colIndex} style={{ width: '60px', height: '60px', margin: '5px', backgroundColor: '#e0e0e0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>&#9981;</div>; // Steering Wheel Icon
+                        if (!seatId) {
+                            return <div key={colIndex} style={{ width: '60px', margin: '3px' }}></div>; // Empty space
                         }
                         
-                        const status = occupiedSeats.includes(seatId) ? 'occupied' : selectedSeats.includes(seatId) ? 'selected' : 'available';
-                        const price = seatId.startsWith('U-') ? UPPER_PRICE : LOWER_PRICE;
+                        const cleanSeatId = seatId.replace('-BLOCKED', '');
+                        const isBlocked = seatId.includes('BLOCKED');
+                        const status = occupiedSeats.includes(cleanSeatId) ? 'occupied' : 
+                                     selectedSeats.includes(cleanSeatId) ? 'selected' : 'available';
+                        
+                        // Use dynamic pricing if available, fallback to hardcoded prices
+                        const price = seatPricing[cleanSeatId] || (cleanSeatId.startsWith('U-') ? UPPER_PRICE : LOWER_PRICE);
 
                         return (
                             <Seat 
-                                key={seatId}
-                                id={seatId} 
+                                key={cleanSeatId}
+                                id={seatId}
                                 price={price}
                                 status={status}
                                 deck={deckName}
-                                onClick={() => toggleSeat(seatId)}
+                                isBlocked={isBlocked}
+                                onClick={() => !isBlocked && toggleSeat(cleanSeatId)}
                             />
                         );
                     })}
@@ -265,14 +363,77 @@ const SeatSelectionPage = () => {
             <p style={{marginBottom: '10px', fontWeight: 'bold'}}>
                 Trip: {tripDetails ? `${tripDetails.departure} to ${tripDetails.destination} on ${new Date(tripDetails.date).toLocaleDateString()} at ${tripDetails.time}` : 'Details Unavailable'}
             </p>
-            <p style={{marginBottom: '25px'}}>
-                **Max {initialPassengers} Seat(s)** | Lower Deck: ₹{LOWER_PRICE} | Upper Deck: ₹{UPPER_PRICE}
-            </p>
+
+            {/* SEAT LEGEND */}
+            <div style={{
+                display: 'flex', 
+                justifyContent: 'center', 
+                gap: '15px', 
+                marginBottom: '20px',
+                flexWrap: 'wrap',
+                fontSize: '0.8rem'
+            }}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
+                    <div style={{width: '20px', height: '20px', backgroundColor: '#e3f2fd', border: '2px solid #ddd', borderRadius: '4px'}}></div>
+                    <span>Available</span>
+                </div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
+                    <div style={{width: '20px', height: '20px', backgroundColor: '#fce4ec', border: '2px solid #ddd', borderRadius: '4px'}}></div>
+                    <span>For Female</span>
+                </div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
+                    <div style={{width: '20px', height: '20px', backgroundColor: '#e8f5e8', border: '2px solid #ddd', borderRadius: '4px'}}></div>
+                    <span>For Male</span>
+                </div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
+                    <div style={{width: '20px', height: '20px', backgroundColor: '#f3e5f5', border: '2px solid #ddd', borderRadius: '4px'}}></div>
+                    <span>Female booked</span>
+                </div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
+                    <div style={{width: '20px', height: '20px', backgroundColor: '#dc3545', border: '2px solid #ddd', borderRadius: '4px'}}></div>
+                    <span>Booked</span>
+                </div>
+            </div>
+
+            {/* PRICE FILTER BUTTONS */}
+            <div style={{
+                display: 'flex', 
+                justifyContent: 'center', 
+                gap: '10px', 
+                marginBottom: '25px',
+                flexWrap: 'wrap'
+            }}>
+                {['All', '₹1199', '₹1299'].map(price => (
+                    <button
+                        key={price}
+                        onClick={() => setPriceFilter(price)}
+                        style={{
+                            padding: '8px 16px',
+                            border: '2px solid #ddd',
+                            borderRadius: '20px',
+                            backgroundColor: priceFilter === price ? '#ff6b6b' : 'white',
+                            color: priceFilter === price ? 'white' : '#333',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        {price}
+                    </button>
+                ))}
+            </div>
             
             {error && <p className="error-message">{error}</p>}
             
-            {/* --- DUAL DECK LAYOUT --- */}
-            <div className="seat-map-main" style={{display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap'}}>
+            {/* --- SIDE BY SIDE DECK LAYOUT --- */}
+            <div className="seat-map-main" style={{
+                display: 'flex', 
+                justifyContent: 'center', 
+                gap: '20px',
+                flexWrap: 'wrap',
+                marginBottom: '30px'
+            }}>
                 {renderDeck('LowerDeck', SEAT_MAP_LAYOUT.LowerDeck)}
                 {renderDeck('UpperDeck', SEAT_MAP_LAYOUT.UpperDeck)}
             </div>
