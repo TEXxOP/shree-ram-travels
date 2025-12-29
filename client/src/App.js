@@ -21,10 +21,35 @@ function App() {
             <div className="page-container" style={{textAlign: 'center'}}>
                 <Link to="/">
                     <img 
-                        src="/shree-ram-logo.png" 
+                        src="/logo.jpg" 
                         alt="Shree Ram Tour and Travels Logo" 
-                        style={{height: '80px', width: 'auto', borderRadius: '0', display: 'block', margin: '0 auto'}}
+                        style={{height: '80px', width: 'auto', borderRadius: '0', display: 'block', margin: '0 auto', backgroundColor: 'white', padding: '5px'}}
+                        onError={(e) => {
+                            console.log('Logo failed to load, using fallback');
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'inline-block';
+                        }}
                     />
+                    <div style={{
+                        background: 'linear-gradient(135deg, #ff6b35, #f7931e)',
+                        color: 'white',
+                        padding: '15px 30px',
+                        borderRadius: '10px',
+                        display: 'none',
+                        fontFamily: 'Arial, sans-serif',
+                        fontWeight: 'bold',
+                        fontSize: '1.5rem',
+                        textAlign: 'center',
+                        boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+                        margin: '10px 0'
+                    }}>
+                        <div style={{fontSize: '1.8rem', marginBottom: '5px'}}>
+                            Shree<span style={{color: '#fff200'}}>Ram</span>
+                        </div>
+                        <div style={{fontSize: '1rem', fontWeight: 'normal', color: '#fff200'}}>
+                            tour and travels
+                        </div>
+                    </div>
                 </Link>
             </div>
         </header>
