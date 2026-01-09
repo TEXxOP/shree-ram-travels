@@ -23,8 +23,20 @@
       "dest": "/manifest.json"
     },
     {
+      "src": "/shree-ram-logo-new.png",
+      "dest": "/shree-ram-logo-new.png"
+    },
+    {
+      "src": "/shree-ram-logo.png",
+      "dest": "/shree-ram-logo.png"
+    },
+    {
       "src": "/logo(.*)",
       "dest": "/logo$1"
+    },
+    {
+      "src": "/(.*\\.(png|jpg|jpeg|gif|ico|svg))",
+      "dest": "/$1"
     },
     {
       "src": "/(.*)",
