@@ -71,22 +71,14 @@ const BusSchedulePage = () => {
     }, [bookingId, departureCity, destinationCity, departureDate]);
 
     // Action when user selects a bus (time)
-    const handleBusSelect = async (busTime) => {
+    const handleBusSelect = async (busTime, busPrice) => {
         setLoading(true);
         setError('');
         
         try {
-            // Update the initial booking with the actual selected departureTime
-            // This re-uses the PUT route for updating seats/amount, but just sends the time for now.
-            // NOTE: We need a dedicated API route for just updating time, but for simplicity, 
-            // we will simulate the update needed for the next step.
-            
-            // Reusing the PUT /api/bookings/:id/seats endpoint by sending dummy data 
-            // is not ideal, so we will simplify: We just save the time to storage and navigate.
-            
-            // For now, we update localStorage and navigate. The seat selection page 
-            // should fetch its occupied seats correctly using this time.
+            // Store the selected bus time and price
             localStorage.setItem('finalDepartureTime', busTime); 
+            localStorage.setItem('selectedBusPrice', busPrice.toString());
 
             // Redirect to seat selection page
             navigate('/select-seat');
@@ -141,7 +133,7 @@ const BusSchedulePage = () => {
                                     ₹{bus.price.toFixed(2)}
                                 </span>
                                 <button 
-                                    onClick={() => handleBusSelect(bus.time)}
+                                    onClick={() => handleBusSelect(bus.time, bus.price)}
                                     className="primary-button" 
                                     style={{padding: '8px 15px', marginTop: '10px'}}
                                     disabled={bus.seatsAvailable === 0}

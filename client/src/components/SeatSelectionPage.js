@@ -10,42 +10,50 @@ const API_BASE_URL = process.env.REACT_APP_API_URL ||
         ? 'https://shree-ram-travels-api.onrender.com' 
         : 'http://localhost:5000');
 const RENDER_API_URL = API_BASE_URL;
-const LOWER_PRICE = 699.00;
-const UPPER_PRICE = 599.00;
-// const TOTAL_SEATS = 40; // Not used - calculated from layout
+
+// Get the selected bus price from localStorage, fallback to default prices
+const getSelectedBusPrice = () => {
+    const storedPrice = localStorage.getItem('selectedBusPrice');
+    return storedPrice ? parseFloat(storedPrice) : 850; // Default fallback price
+};
+
+const SELECTED_BUS_PRICE = getSelectedBusPrice();
+// For seat differentiation, we can still have slight price differences
+const LOWER_PRICE = SELECTED_BUS_PRICE; // Use the selected bus price for lower deck
+const UPPER_PRICE = SELECTED_BUS_PRICE - 50; // Upper deck slightly cheaper
 // ---------------------
 
-// --- NEW SEAT LAYOUT STRUCTURE (Based on your image) ---
+// --- NEW SEAT LAYOUT STRUCTURE (Based on your image with walking areas) ---
 const SEAT_MAP_LAYOUT = {
-    // Lower Deck (Left side - 22 seats)
+    // Lower Deck (Left side - 22 seats with walking areas)
     LowerDeck: [
-        // Row 1: Single | Pair | Pair
-        ['L-A1', 'L-B1', 'L-C1'], 
-        // Row 2: Single (blocked) | Pair
-        ['L-A2-BLOCKED', 'L-B2', 'L-C2'], 
-        // Row 3: Single (blocked) | Pair
-        ['L-A3-BLOCKED', 'L-B3', 'L-C3'], 
-        // Row 4: Single | Pair (blocked)
-        ['L-A4', 'L-B4-BLOCKED', 'L-C4-BLOCKED'],
-        // Row 5: Single (blocked) | Pair
-        ['L-A5-BLOCKED', 'L-B5', 'L-C5'],
+        // Row 1: Single | GAP | Pair | GAP | Pair
+        ['L-A1', 'AISLE', 'L-B1', 'L-C1'], 
+        // Row 2: Single (blocked) | GAP | Pair
+        ['L-A2-BLOCKED', 'AISLE', 'L-B2', 'L-C2'], 
+        // Row 3: Single (blocked) | GAP | Pair
+        ['L-A3-BLOCKED', 'AISLE', 'L-B3', 'L-C3'], 
+        // Row 4: Single | GAP | Pair (blocked)
+        ['L-A4', 'AISLE', 'L-B4-BLOCKED', 'L-C4-BLOCKED'],
+        // Row 5: Single (blocked) | GAP | Pair
+        ['L-A5-BLOCKED', 'AISLE', 'L-B5', 'L-C5'],
         // Row 6: Single (back row)
-        ['L-A6'],
+        ['L-A6', 'AISLE', '', ''],
     ],
-    // Upper Deck (Right side - 22 seats)  
+    // Upper Deck (Right side - 22 seats with walking areas)  
     UpperDeck: [
-        // Row 1: Single | Pair | Pair
-        ['U-A1', 'U-B1', 'U-C1'], 
-        // Row 2: Single (blocked) | Pair
-        ['U-A2-BLOCKED', 'U-B2', 'U-C2'], 
-        // Row 3: Single | Pair
-        ['U-A3', 'U-B3', 'U-C3'], 
-        // Row 4: Single | Pair (blocked)
-        ['U-A4', 'U-B4-BLOCKED', 'U-C4-BLOCKED'],
-        // Row 5: Single (blocked) | Pair
-        ['U-A5-BLOCKED', 'U-B5', 'U-C5'],
+        // Row 1: Single | GAP | Pair | GAP | Pair
+        ['U-A1', 'AISLE', 'U-B1', 'U-C1'], 
+        // Row 2: Single (blocked) | GAP | Pair
+        ['U-A2-BLOCKED', 'AISLE', 'U-B2', 'U-C2'], 
+        // Row 3: Single | GAP | Pair
+        ['U-A3', 'AISLE', 'U-B3', 'U-C3'], 
+        // Row 4: Single | GAP | Pair (blocked)
+        ['U-A4', 'AISLE', 'U-B4-BLOCKED', 'U-C4-BLOCKED'],
+        // Row 5: Single (blocked) | GAP | Pair
+        ['U-A5-BLOCKED', 'AISLE', 'U-B5', 'U-C5'],
         // Row 6: Single (back row)
-        ['U-A6'],
+        ['U-A6', 'AISLE', '', ''],
     ],
 };
 // ----------------------------------------------------
@@ -160,8 +168,9 @@ const SeatSelectionPage = () => {
                 Object.values(SEAT_MAP_LAYOUT).flat().forEach(row => {
                     if (Array.isArray(row)) {
                         row.forEach(seatId => {
-                            if (seatId && seatId !== 'WHEEL') {
-                                pricingMap[seatId] = seatId.startsWith('U-') ? UPPER_PRICE : LOWER_PRICE;
+                            if (seatId && seatId !== 'WHEEL' && seatId !== 'AISLE' && seatId !== '') {
+                                const cleanSeatId = seatId.replace('-BLOCKED', '');
+                                pricingMap[cleanSeatId] = cleanSeatId.startsWith('U-') ? UPPER_PRICE : LOWER_PRICE;
                             }
                         });
                     }
@@ -176,8 +185,9 @@ const SeatSelectionPage = () => {
             Object.values(SEAT_MAP_LAYOUT).flat().forEach(row => {
                 if (Array.isArray(row)) {
                     row.forEach(seatId => {
-                        if (seatId && seatId !== 'WHEEL') {
-                            fallbackPricing[seatId] = seatId.startsWith('U-') ? UPPER_PRICE : LOWER_PRICE;
+                        if (seatId && seatId !== 'WHEEL' && seatId !== 'AISLE' && seatId !== '') {
+                            const cleanSeatId = seatId.replace('-BLOCKED', '');
+                            fallbackPricing[cleanSeatId] = cleanSeatId.startsWith('U-') ? UPPER_PRICE : LOWER_PRICE;
                         }
                     });
                 }
@@ -315,7 +325,31 @@ const SeatSelectionPage = () => {
                     gap: '5px'
                 }}>
                     {row.map((seatId, colIndex) => {
-                        if (!seatId) {
+                        // Handle aisle/walking area
+                        if (seatId === 'AISLE') {
+                            return (
+                                <div key={`aisle-${colIndex}`} style={{
+                                    width: '20px', 
+                                    height: '80px',
+                                    margin: '3px',
+                                    backgroundColor: '#f0f0f0',
+                                    border: '2px dashed #ccc',
+                                    borderRadius: '4px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.6rem',
+                                    color: '#999',
+                                    writingMode: 'vertical-rl',
+                                    textOrientation: 'mixed'
+                                }}>
+                                    🚶
+                                </div>
+                            );
+                        }
+                        
+                        // Handle empty spaces
+                        if (!seatId || seatId === '') {
                             return <div key={colIndex} style={{ width: '60px', margin: '3px' }}></div>; // Empty space
                         }
                         
@@ -401,7 +435,7 @@ const SeatSelectionPage = () => {
                 marginBottom: '25px',
                 flexWrap: 'wrap'
             }}>
-                {['All', '₹1199', '₹1299'].map(price => (
+                {['All', `₹${UPPER_PRICE}`, `₹${LOWER_PRICE}`].map(price => (
                     <button
                         key={price}
                         onClick={() => setPriceFilter(price)}
@@ -424,15 +458,44 @@ const SeatSelectionPage = () => {
             
             {error && <p className="error-message">{error}</p>}
             
-            {/* --- SIDE BY SIDE DECK LAYOUT --- */}
+            {/* --- SIDE BY SIDE DECK LAYOUT WITH CENTRAL WALKING AREA --- */}
             <div className="seat-map-main" style={{
                 display: 'flex', 
                 justifyContent: 'center', 
-                gap: '20px',
+                gap: '30px', // Increased gap for walking area
                 flexWrap: 'wrap',
                 marginBottom: '30px'
             }}>
                 {renderDeck('LowerDeck', SEAT_MAP_LAYOUT.LowerDeck)}
+                
+                {/* Central Walking Area */}
+                <div style={{
+                    width: '40px',
+                    minHeight: '400px',
+                    backgroundColor: '#f8f9fa',
+                    border: '2px dashed #dee2e6',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '20px',
+                    padding: '10px 0'
+                }}>
+                    <div style={{
+                        writingMode: 'vertical-rl',
+                        textOrientation: 'mixed',
+                        fontSize: '0.8rem',
+                        color: '#6c757d',
+                        fontWeight: 'bold'
+                    }}>
+                        WALKING AREA
+                    </div>
+                    <div style={{fontSize: '1.5rem'}}>🚶</div>
+                    <div style={{fontSize: '1.5rem'}}>🚶</div>
+                    <div style={{fontSize: '1.5rem'}}>🚶</div>
+                </div>
+                
                 {renderDeck('UpperDeck', SEAT_MAP_LAYOUT.UpperDeck)}
             </div>
             {/* ------------------------- */}
