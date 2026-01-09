@@ -21,7 +21,7 @@ function App() {
             <div className="page-container" style={{textAlign: 'center'}}>
                 <Link to="/">
                     <img 
-                        src="/WhatsApp Image 2025-12-29 at 8.28.19 PM-Photoroom (1).png" 
+                        src="/shree-ram-logo-new.png" 
                         alt="Shree Ram Tour and Travels Logo" 
                         style={{height: '80px', width: 'auto', borderRadius: '0', display: 'block', margin: '0 auto', backgroundColor: 'white', padding: '5px'}}
                         onError={(e) => {
