@@ -61,6 +61,7 @@ const allowedOrigins = [
     'https://shree-ram-travels-harishkumarsaini18s-projects.vercel.app', // Vercel preview URLs
     'https://ramjibus.com',
     'https://www.ramjibus.com',
+    'https://floppy-trains-do.loca.lt', // Temporary localtunnel
     /\.vercel\.app$/ // Allow all Vercel preview deployments
 ];
 

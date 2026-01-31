@@ -7,7 +7,7 @@ import axios from 'axios';
 // --- CONFIGURATION (Auto-detects environment) ---
 const API_BASE_URL = process.env.REACT_APP_API_URL || 
     (process.env.NODE_ENV === 'production' 
-        ? 'https://shree-ram-travels-api.onrender.com' 
+        ? 'https://floppy-trains-do.loca.lt' 
         : 'http://localhost:5000');
 const RENDER_API_URL = API_BASE_URL;
 
