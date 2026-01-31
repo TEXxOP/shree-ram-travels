@@ -1167,6 +1167,19 @@ app.get('/api/seats/availability/:routeId', async (req, res) => {
     }
 });
 
+// Root route for health check
+app.get('/', (req, res) => {
+    res.json({ 
+        status: 'Server is running',
+        message: 'Shree Ram Tour and Travels API',
+        endpoints: {
+            routes: '/api/routes/all',
+            bookings: '/api/bookings/initiate',
+            tracking: '/api/bookings/status/:ts'
+        }
+    });
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
