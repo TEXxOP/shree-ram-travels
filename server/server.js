@@ -64,29 +64,11 @@ const allowedOrigins = [
     /\.vercel\.app$/ // Allow all Vercel preview deployments
 ];
 
+// Temporarily allow all origins for debugging
 app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin) return callback(null, true);
-        
-        // Check if origin matches any allowed origin (string or regex)
-        const isAllowed = allowedOrigins.some(allowedOrigin => {
-            if (typeof allowedOrigin === 'string') {
-                return origin === allowedOrigin;
-            }
-            if (allowedOrigin instanceof RegExp) {
-                return allowedOrigin.test(origin);
-            }
-            return false;
-        });
-        
-        if (!isAllowed) {
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    },
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
+    credentials: false,
 })); 
 app.use(express.json()); 
 
